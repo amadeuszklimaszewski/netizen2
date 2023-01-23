@@ -1,0 +1,19 @@
+[run]
+concurrency =
+  greenlet
+  thread
+omit =
+    */.local/*
+    /usr/*
+    */tests/*
+    /venv/*
+    */scratchpad.py
+    */settings.py
+    */settings/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    @abstract
+    NotImplementedError
+    if __name__ == .__main__.:
