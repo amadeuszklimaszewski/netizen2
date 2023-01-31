@@ -8,7 +8,7 @@ authors = ["Your Name <you@example.com>"]
 python = "^3.10"
 fastapi = "^0.89.1"
 alembic = "^1.9.2"
-SQLAlchemy = {version = "^2.0.0rc3", extras = ["mypy", "asyncio"]}
+SQLAlchemy = {version = "^2.0.0", extras = ["mypy", "asyncio"]}
 pydantic = "^1.10.4"
 greenlet = "^2.0.1"
 dynaconf = "^3.1.11"
