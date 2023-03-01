@@ -1,4 +1,3 @@
-import asyncio
 from typing import Any, AsyncGenerator
 
 import pytest
@@ -11,13 +10,6 @@ from src.infrastructure.database.metadata import metadata
 from src.infrastructure.database.tables import load_all_tables
 from src.settings import Settings
 from src.web.application import get_app
-
-
-@pytest.fixture(scope="session")
-def event_loop():
-    loop = asyncio.get_event_loop()
-    yield loop
-    loop.close()
 
 
 @pytest.fixture(scope="session")

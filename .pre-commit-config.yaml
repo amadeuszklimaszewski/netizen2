@@ -58,5 +58,4 @@ repos:
     language: system
     types: [python]
     pass_filenames: false
-    args:
-    - "src"
+    args: ["--namespace-packages", "--explicit-package-bases", "."]

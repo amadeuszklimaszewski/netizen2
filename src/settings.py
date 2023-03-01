@@ -8,6 +8,16 @@ class AppSettings(BaseSettings):
     RELOAD: bool = False
 
 
+class EmailSettings(BaseSettings):
+    MAIL_FROM: str = "default@example.com"
+
+
+class JWTSettings(BaseSettings):
+    JWT_SECRET_KEY: str
+    HASHING_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_TIME: int = 24 * 60 * 60
+
+
 class DatabaseSettings(BaseSettings):
     POSTGRES_HOST: str
     POSTGRES_DATABASE: str
@@ -27,7 +37,7 @@ class DatabaseSettings(BaseSettings):
         )
 
 
-class Settings(AppSettings, DatabaseSettings):
+class Settings(AppSettings, JWTSettings, EmailSettings, DatabaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

@@ -1,7 +1,7 @@
 [flake8]
 max-complexity = 6
 inline-quotes = double
-max-line-length = 88
+max-line-length = 120
 extend-ignore = E203
 docstring_style=sphinx
 
@@ -9,6 +9,18 @@ ignore =
   ; Found `f` string
   WPS305,
   ; Missing docstring in public module
+  WPS601,
+  ; Found shadowed class attribute
+  WPS215,
+  ; Found too many base classes
+  WPS237,
+  ; Found too complex f-string
+  WPS604,
+  WPS420,
+  WPS329,
+  N805,
+  WPS120,
+  S106,
   D100,
   ; Missing docstring in magic method
   D101,
@@ -67,6 +79,8 @@ ignore =
   ; Found unpythonic getter or setter
   WPS615,
   ; Found a line that starts with a dot
+  WPS337,
+  ; Found multiline conditions
   WPS348,
   ; Found complex default value (for dependency injection)
   WPS404,
