@@ -5,7 +5,7 @@ from src.core.schemas.email import EmailSchema
 
 class EmailClient(ABC):
     @abstractmethod
-    def send(self, email: EmailSchema) -> None:
+    def send(self, email: EmailSchema, body: str) -> None:
         raise NotImplementedError
 
 

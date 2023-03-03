@@ -1,11 +1,15 @@
-from typing import Any
 from uuid import UUID
 
-from src.core.exceptions import AlreadyExistsError
+from src.core.exceptions import (
+    AlreadyActiveError,
+    AlreadyExistsError,
+    DoesNotExistError,
+)
 from src.core.interfaces.email import EmailService
 from src.core.interfaces.repositories.user import UserRepository
 from src.core.models.user import User
 from src.core.schemas.email import EmailSchema
+from src.core.schemas.user import CreateUserSchema
 from src.core.utils import get_password_hash
 
 
@@ -14,17 +18,20 @@ class UserService:
         self.repository = repository
         self.email_service = email_service
 
-    async def create_user(self, user_data: dict[str, Any]) -> User:
-        if await self.repository.get_by_email(user_data["email"]):
+    async def create_user(self, schema: CreateUserSchema) -> User:
+        if await self.repository.get_by_email(schema.email):
             raise AlreadyExistsError("User with given email already exists")
 
-        hashed_password = get_password_hash(user_data["password"])
-        new_user = User(email=user_data["email"], password_hash=hashed_password)
+        hashed_password = get_password_hash(schema.password)
+        new_user = User(email=schema.email, password_hash=hashed_password)
         await self.repository.persist(new_user)
         return new_user
 
     async def send_activation_email(self, user_id: UUID) -> None:
         user = await self.repository.get(pk=user_id)
+
+        if user.is_active:
+            raise AlreadyActiveError("User is already active")
 
         user.generate_email_confirmation_token()
         await self.repository.update(user)
@@ -37,8 +44,10 @@ class UserService:
         )
         self.email_service.send_email(activation_email)
 
-    async def send_password_reset_email(self, user_id: UUID) -> None:
-        user = await self.repository.get(pk=user_id)
+    async def send_password_reset_email(self, email: str) -> None:
+        user = await self.repository.get_by_email(email)
+        if not user:
+            raise DoesNotExistError("User with given email does not exist")
 
         user.generate_password_reset_token()
         await self.repository.update(user)

@@ -6,7 +6,7 @@ class DoesNotExistError(Exception):
     pass
 
 
-class UserAlreadyActivatedError(Exception):
+class AlreadyActiveError(Exception):
     pass
 
 

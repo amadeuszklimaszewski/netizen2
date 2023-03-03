@@ -2,9 +2,9 @@ from datetime import datetime, timedelta
 from uuid import uuid4
 
 from src.core.exceptions import (
+    AlreadyActiveError,
     InvalidTokenError,
     TokenExpiredError,
-    UserAlreadyActivatedError,
     UserNotActiveError,
 )
 from src.core.models.base import AppModel
@@ -35,7 +35,7 @@ class User(AppModel):
 
     def activate(self) -> None:
         if self.is_active:
-            raise UserAlreadyActivatedError("User is already active")
+            raise AlreadyActiveError("User is already active")
 
         self.is_active = True
 

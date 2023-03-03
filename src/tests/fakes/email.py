@@ -6,8 +6,8 @@ class FakeEmailClient(EmailClient):
     def __init__(self) -> None:
         self.inbox: list = []
 
-    def send(self, email: EmailSchema) -> None:
-        self.inbox.append(email)
+    def send(self, email: EmailSchema, body: str) -> None:
+        self.inbox.append((email, body))
 
 
 class FakeEmailService(EmailService):
@@ -15,4 +15,4 @@ class FakeEmailService(EmailService):
         self.client = FakeEmailClient()
 
     def send_email(self, email: EmailSchema) -> None:
-        self.client.send(email)
+        self.client.send(email, "fake body")

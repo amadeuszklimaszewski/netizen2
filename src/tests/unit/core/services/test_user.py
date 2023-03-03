@@ -9,6 +9,7 @@ from src.core.interfaces.email import EmailService
 from src.core.interfaces.repositories.user import UserRepository
 from src.core.models.user import User
 from src.core.schemas.email import EmailSchema
+from src.core.schemas.user import CreateUserSchema
 from src.core.services.user import UserService
 from src.tests.fakes.email import FakeEmailService
 from src.tests.fakes.repositories.user import FakeUserRepository
@@ -32,22 +33,26 @@ def user_service(
     return UserService(user_repository, email_service)
 
 
+@pytest.fixture
+def create_user_schema() -> CreateUserSchema:
+    return CreateUserSchema(
+        email="test@example.com",
+        password="password",
+        repeat_password="password",
+    )
+
+
 @pytest_asyncio.fixture
-async def user(user_service: UserService) -> User:
-    user_data = {
-        "email": "test@example.com",
-        "password": "password",
-    }
-    return await user_service.create_user(user_data)
+async def user(create_user_schema: CreateUserSchema, user_service: UserService) -> User:
+    return await user_service.create_user(create_user_schema)
 
 
 @pytest.mark.asyncio
-async def test_create_user(user_service: UserService) -> None:
-    user_data = {
-        "email": "test@example.com",
-        "password": "password",
-    }
-    user = await user_service.create_user(user_data)
+async def test_create_user(
+    create_user_schema: CreateUserSchema,
+    user_service: UserService,
+) -> None:
+    user = await user_service.create_user(create_user_schema)
 
     assert user is not None
     assert user.email == "test@example.com"
@@ -57,16 +62,12 @@ async def test_create_user(user_service: UserService) -> None:
 
 @pytest.mark.asyncio
 async def test_create_user_already_exists(
+    create_user_schema: CreateUserSchema,
     user_service: UserService,
     user: User,
 ) -> None:
-    user_data = {
-        "email": user.email,
-        "password": "password",
-    }
-
     with pytest.raises(AlreadyExistsError):
-        await user_service.create_user(user_data)
+        await user_service.create_user(create_user_schema)
 
 
 @pytest.mark.asyncio
@@ -172,7 +173,7 @@ async def test_send_password_reset_email(
     mocker: MockerFixture,
 ) -> None:
     user_service.email_service.send_email = mocker.Mock()  # type: ignore
-    await user_service.send_password_reset_email(user.id)
+    await user_service.send_password_reset_email(user.email)
 
     assert user.password_reset_token is not None
 
@@ -192,7 +193,7 @@ async def test_send_password_reset_email_does_not_exist(
     user_service: UserService,
 ) -> None:
     with pytest.raises(DoesNotExistError):
-        await user_service.send_password_reset_email(uuid4())
+        await user_service.send_password_reset_email("invalid@example.com")
 
 
 @pytest.mark.asyncio

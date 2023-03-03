@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 import pytest
 
 from src.core.exceptions import (
+    AlreadyActiveError,
     InvalidTokenError,
     TokenExpiredError,
-    UserAlreadyActivatedError,
     UserNotActiveError,
 )
 from src.core.models.user import User
@@ -46,7 +46,7 @@ def test_activate(user: User):
 
 
 def test_activate_already_active(active_user: User):
-    with pytest.raises(UserAlreadyActivatedError):
+    with pytest.raises(AlreadyActiveError):
         active_user.activate()
 
 

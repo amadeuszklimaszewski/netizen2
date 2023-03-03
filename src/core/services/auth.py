@@ -5,6 +5,7 @@ from src.core.exceptions import (
 )
 from src.core.interfaces.repositories.user import UserRepository
 from src.core.models.user import User
+from src.core.schemas.auth import UserCredentials
 from src.core.schemas.jwt import JWTPayload
 from src.core.services.jwt import decode_jwt, encode_jwt
 from src.core.utils import verify_password
@@ -27,16 +28,13 @@ class AuthService:
 
         return user
 
-    async def verify_user_credentials(self, credentials: dict[str, str]) -> str:
-        email = credentials["email"]
-        password = credentials["password"]
-
+    async def verify_user_credentials(self, credentials: UserCredentials) -> str:
         try:
-            user = await self.repository.get_by_email(email)
+            user = await self.repository.get_by_email(credentials.email)
         except DoesNotExistError:
             raise InvalidCredentialsError("Invalid credentials")
 
-        if not user or not verify_password(password, user.password_hash):
+        if not user or not verify_password(credentials.password, user.password_hash):
             raise InvalidCredentialsError("Invalid credentials")
 
         return self.create_access_token(user)
