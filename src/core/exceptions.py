@@ -1,26 +1,46 @@
-class AlreadyExistsError(Exception):
+class AuthenticationError(Exception):
     pass
 
 
-class DoesNotExistError(Exception):
+class InvalidAccessTokenError(AuthenticationError):
     pass
 
 
-class AlreadyActiveError(Exception):
+class ExpiredAccessTokenError(AuthenticationError):
     pass
 
 
-class UserNotActiveError(Exception):
+class InvalidCredentialsError(AuthenticationError):
     pass
 
 
-class InvalidTokenError(Exception):
+class PermissionDeniedError(AuthenticationError):
     pass
 
 
-class TokenExpiredError(Exception):
+class ApplicationError(Exception):
     pass
 
 
-class InvalidCredentialsError(Exception):
+class InvalidTokenError(ApplicationError):
+    pass
+
+
+class ExpiredTokenError(ApplicationError):
+    pass
+
+
+class AlreadyExistsError(ApplicationError):
+    pass
+
+
+class DoesNotExistError(ApplicationError):
+    pass
+
+
+class AlreadyActiveError(ApplicationError):
+    pass
+
+
+class UserNotActiveError(ApplicationError):
     pass

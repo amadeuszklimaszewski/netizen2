@@ -188,8 +188,8 @@ async def test_password_reset_unauthorized_invalid_email(
         json=post_data,
     )
 
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-    assert response.json() == {"detail": "Permission denied"}
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Not found"}
 
 
 @pytest.mark.asyncio

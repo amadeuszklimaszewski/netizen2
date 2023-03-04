@@ -3,8 +3,8 @@ from uuid import uuid4
 
 from src.core.exceptions import (
     AlreadyActiveError,
+    ExpiredTokenError,
     InvalidTokenError,
-    TokenExpiredError,
     UserNotActiveError,
 )
 from src.core.models.base import AppModel
@@ -60,7 +60,7 @@ class User(AppModel):
             not self.password_reset_token_expires_at
             or self.password_reset_token_expires_at <= datetime.now()
         ):
-            raise TokenExpiredError("Expired token")
+            raise ExpiredTokenError("Expired token")
 
         self.password_hash = get_password_hash(new_password)
         self.password_reset_token = None

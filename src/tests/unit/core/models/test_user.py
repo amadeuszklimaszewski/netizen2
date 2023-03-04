@@ -4,8 +4,8 @@ import pytest
 
 from src.core.exceptions import (
     AlreadyActiveError,
+    ExpiredTokenError,
     InvalidTokenError,
-    TokenExpiredError,
     UserNotActiveError,
 )
 from src.core.models.user import User
@@ -110,7 +110,7 @@ def test_reset_password_expired_token(user: User):
     token = user.generate_password_reset_token()
     user.password_reset_token_expires_at = datetime.now() - timedelta(hours=1)
 
-    with pytest.raises(TokenExpiredError):
+    with pytest.raises(ExpiredTokenError):
         user.reset_password(token, "new_password")
 
 

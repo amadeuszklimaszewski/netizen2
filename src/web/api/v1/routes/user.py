@@ -6,7 +6,6 @@ from fastapi.routing import APIRouter
 from src.core.exceptions import (
     AlreadyActiveError,
     AlreadyExistsError,
-    DoesNotExistError,
     InvalidTokenError,
 )
 from src.core.schemas.user import CreateUserSchema
@@ -82,13 +81,7 @@ async def unauthenticated_send_password_reset_email(
     schema: SendPasswordResetEmailSchema,
     user_service: UserService = Depends(get_user_service),
 ):
-    try:
-        await user_service.send_password_reset_email(schema.email)
-    except DoesNotExistError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Permission denied",
-        )
+    await user_service.send_password_reset_email(schema.email)
 
 
 @user_router.get(
@@ -139,10 +132,10 @@ async def reset_password(
 ):
     try:
         await user_service.reset_password(user_id, token, schema.password)
-    except (InvalidTokenError, DoesNotExistError):
+    except InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid token",
+            detail="Bad request",
         )
 
 
@@ -157,7 +150,7 @@ async def resend_activation_email(
 ):
     try:
         await user_service.send_activation_email(user_id)
-    except (AlreadyActiveError, DoesNotExistError):
+    except AlreadyActiveError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Bad request",
@@ -176,7 +169,7 @@ async def confirm_email(
 ):
     try:
         await user_service.confirm_email(user_id, email_confirmation_token)
-    except (AlreadyActiveError, InvalidTokenError, DoesNotExistError):
+    except (AlreadyActiveError, InvalidTokenError):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Bad request",

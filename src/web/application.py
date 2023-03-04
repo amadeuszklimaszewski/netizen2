@@ -3,9 +3,9 @@ from fastapi.responses import JSONResponse
 
 from src.core.exceptions import (
     DoesNotExistError,
+    ExpiredAccessTokenError,
+    InvalidAccessTokenError,
     InvalidCredentialsError,
-    InvalidTokenError,
-    TokenExpiredError,
 )
 from src.web.api.v1.router import api_router
 
@@ -34,20 +34,20 @@ def get_app() -> FastAPI:
             content={"detail": "Invalid credentials"},
         )
 
-    @app.exception_handler(InvalidTokenError)
+    @app.exception_handler(InvalidAccessTokenError)
     async def invalid_token_exception_handler(
         request: Request,
-        exc: InvalidTokenError,
+        exc: InvalidAccessTokenError,
     ):
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
             content={"detail": "Invalid token"},
         )
 
-    @app.exception_handler(TokenExpiredError)
+    @app.exception_handler(ExpiredAccessTokenError)
     async def token_expired_exception_handler(
         request: Request,
-        exc: TokenExpiredError,
+        exc: ExpiredAccessTokenError,
     ):
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
