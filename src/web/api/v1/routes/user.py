@@ -53,7 +53,7 @@ async def create_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User with given email already exists",
         )
-    return user.id
+    return user
 
 
 @user_router.get(
@@ -66,14 +66,7 @@ async def get_current_user(
     access_token: str = Depends(oauth2_scheme),
     auth_service: AuthService = Depends(get_auth_service),
 ):
-    try:
-        user = await auth_service.verify_access_token(access_token)
-    except InvalidTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Permission denied",
-        )
-    return user
+    return await auth_service.verify_access_token(access_token)
 
 
 @user_router.post(
@@ -142,7 +135,7 @@ async def reset_password(
 ):
     try:
         await user_service.reset_password(user_id, token, new_password)
-    except InvalidTokenError:
+    except (InvalidTokenError, DoesNotExistError):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid token",
@@ -160,7 +153,7 @@ async def resend_activation_email(
 ):
     try:
         await user_service.send_activation_email(user_id)
-    except AlreadyActiveError:
+    except (AlreadyActiveError, DoesNotExistError):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Bad request",
@@ -179,12 +172,7 @@ async def confirm_email(
 ):
     try:
         await user_service.confirm_email(user_id, email_confirmation_token)
-    except AlreadyActiveError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Bad request",
-        )
-    except InvalidTokenError:
+    except (AlreadyActiveError, InvalidTokenError, DoesNotExistError):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Bad request",

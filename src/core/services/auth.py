@@ -21,7 +21,10 @@ class AuthService:
 
     async def verify_access_token(self, auth_token) -> User:
         payload = decode_jwt(auth_token)
-        user = await self.repository.get(payload.sub)
+        try:
+            user = await self.repository.get(payload.sub)
+        except DoesNotExistError:
+            raise InvalidCredentialsError("Invalid credentials")
 
         if not user.is_active:
             raise UserNotActiveError("Please activate your account")
