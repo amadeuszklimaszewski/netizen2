@@ -5,32 +5,10 @@ import pytest_asyncio
 from pytest_mock import MockerFixture
 
 from src.core.exceptions import AlreadyExistsError, DoesNotExistError, InvalidTokenError
-from src.core.interfaces.email import EmailService
-from src.core.interfaces.repositories.user import UserRepository
 from src.core.models.user import User
 from src.core.schemas.email import EmailSchema
 from src.core.schemas.user import CreateUserSchema
 from src.core.services.user import UserService
-from src.tests.fakes.email import FakeEmailService
-from src.tests.fakes.repositories.user import FakeUserRepository
-
-
-@pytest.fixture
-def user_repository() -> UserRepository:
-    return FakeUserRepository()
-
-
-@pytest.fixture
-def email_service() -> EmailService:
-    return FakeEmailService()
-
-
-@pytest.fixture
-def user_service(
-    user_repository: UserRepository,
-    email_service: EmailService,
-) -> UserService:
-    return UserService(user_repository, email_service)
 
 
 @pytest.fixture

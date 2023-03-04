@@ -18,7 +18,7 @@ from src.web.api.v1.dependencies import (
     oauth2_scheme,
 )
 from src.web.api.v1.schemas.base import IDOnlyOutputSchema
-from src.web.api.v1.schemas.user import UserOutputSchema
+from src.web.api.v1.schemas.user import PasswordResetSchema, UserOutputSchema
 
 user_router = APIRouter(prefix="/users")
 
@@ -75,11 +75,11 @@ async def get_current_user(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def unauthenticated_send_password_reset_email(
-    email: str,
+    schema: PasswordResetSchema,
     user_service: UserService = Depends(get_user_service),
 ):
     try:
-        await user_service.send_password_reset_email(email)
+        await user_service.send_password_reset_email(schema.email)
     except DoesNotExistError:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

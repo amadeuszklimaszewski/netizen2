@@ -4,8 +4,8 @@ from fastapi.responses import JSONResponse
 from src.core.exceptions import (
     DoesNotExistError,
     InvalidCredentialsError,
-    TokenExpiredError,
     InvalidTokenError,
+    TokenExpiredError,
 )
 from src.web.api.v1.router import api_router
 

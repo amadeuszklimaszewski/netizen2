@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class UserOutputSchema(BaseModel):
@@ -12,3 +12,7 @@ class UserOutputSchema(BaseModel):
     first_name: str | None
     last_name: str | None
     date_of_birth: datetime | None
+
+
+class PasswordResetSchema(BaseModel):
+    email: EmailStr

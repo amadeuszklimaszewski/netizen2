@@ -6,9 +6,15 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, create_async_engine
 
+from src.core.interfaces.email import EmailService
+from src.core.interfaces.repositories.user import UserRepository
+from src.core.services.user import UserService
 from src.infrastructure.database.metadata import metadata
 from src.infrastructure.database.tables import load_all_tables
 from src.settings import Settings
+from src.tests.fakes.email import FakeEmailService
+from src.tests.fakes.repositories.user import FakeUserRepository
+from src.web.api.v1.dependencies import get_email_service, get_user_repository
 from src.web.application import get_app
 
 
@@ -41,9 +47,32 @@ async def async_db_connection(
 
 
 @pytest.fixture
-def fastapi_app() -> FastAPI:
-    application = get_app()
-    return application  # noqa: WPS331
+def user_repository() -> UserRepository:
+    return FakeUserRepository()
+
+
+@pytest.fixture
+def email_service() -> EmailService:
+    return FakeEmailService()
+
+
+@pytest.fixture
+def user_service(
+    user_repository: UserRepository,
+    email_service: EmailService,
+) -> UserService:
+    return UserService(user_repository, email_service)
+
+
+@pytest.fixture
+def fastapi_app(
+    email_service: EmailService,
+    user_repository: UserRepository,
+) -> FastAPI:
+    app = get_app()
+    app.dependency_overrides[get_user_repository] = lambda: user_repository
+    app.dependency_overrides[get_email_service] = lambda: email_service
+    return app  # noqa: WPS331
 
 
 @pytest_asyncio.fixture
@@ -51,5 +80,5 @@ async def client(
     fastapi_app: FastAPI,
     anyio_backend: Any,
 ) -> AsyncGenerator[AsyncClient, None]:
-    async with AsyncClient(app=fastapi_app, base_url="http://test") as client:
+    async with AsyncClient(app=fastapi_app, base_url="http://test/api/v1") as client:
         yield client
