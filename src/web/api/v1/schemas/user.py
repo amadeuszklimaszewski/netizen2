@@ -14,5 +14,9 @@ class UserOutputSchema(BaseModel):
     date_of_birth: datetime | None
 
 
-class PasswordResetSchema(BaseModel):
+class SendPasswordResetEmailSchema(BaseModel):
     email: EmailStr
+
+
+class PasswordResetSchema(BaseModel):
+    password: str

@@ -18,7 +18,11 @@ from src.web.api.v1.dependencies import (
     oauth2_scheme,
 )
 from src.web.api.v1.schemas.base import IDOnlyOutputSchema
-from src.web.api.v1.schemas.user import PasswordResetSchema, UserOutputSchema
+from src.web.api.v1.schemas.user import (
+    PasswordResetSchema,
+    SendPasswordResetEmailSchema,
+    UserOutputSchema,
+)
 
 user_router = APIRouter(prefix="/users")
 
@@ -70,12 +74,12 @@ async def get_current_user(
 
 
 @user_router.post(
-    "/password-reset/",
+    "/password-reset/send-email/",
     tags=["users"],
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def unauthenticated_send_password_reset_email(
-    schema: PasswordResetSchema,
+    schema: SendPasswordResetEmailSchema,
     user_service: UserService = Depends(get_user_service),
 ):
     try:
@@ -101,7 +105,7 @@ async def get_user(
 
 
 @user_router.post(
-    "/{user_id}/password-reset/",
+    "/{user_id}/password-reset/send-email/",
     tags=["users"],
     status_code=status.HTTP_204_NO_CONTENT,
 )
@@ -115,26 +119,26 @@ async def send_password_reset_email(
 
     if user.id != user_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Permission denied",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not found",
         )
 
     await user_service.send_password_reset_email(user.email)
 
 
 @user_router.post(
-    "/{user_id}/password-reset/{token}",
+    "/{user_id}/password-reset/{token}/",
     tags=["users"],
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def reset_password(
     user_id: UUID,
     token: str,
-    new_password: str,
+    schema: PasswordResetSchema,
     user_service: UserService = Depends(get_user_service),
 ):
     try:
-        await user_service.reset_password(user_id, token, new_password)
+        await user_service.reset_password(user_id, token, schema.password)
     except (InvalidTokenError, DoesNotExistError):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -143,7 +147,7 @@ async def reset_password(
 
 
 @user_router.post(
-    "/{user_id}/activate/",
+    "/{user_id}/activate/send-email/",
     tags=["users"],
     status_code=status.HTTP_204_NO_CONTENT,
 )
@@ -161,7 +165,7 @@ async def resend_activation_email(
 
 
 @user_router.post(
-    "/{user_id}/activate/{email_confirmation_token}",
+    "/{user_id}/activate/{email_confirmation_token}/",
     tags=["users"],
     status_code=status.HTTP_204_NO_CONTENT,
 )

@@ -22,6 +22,7 @@ ignore =
   WPS120,
   S106,
   WPS430,
+  WPS118,
   D100,
   ; Missing docstring in magic method
   D101,
