@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Account Activation</title>
+  </head>
+  <body>
+    <p>Hello {{ first_name }} {{ last_name }},</p>
+    <p>Thank you for registering on our platform. We are excited to have you as a member of our community!</p>
+    <p>To activate your account, please click on the link below:</p>
+    <a href="http://netizen.com/activate?token={{ email_confirmation_token }}&email={{ email }}">Activate Account</a>
+    <p>If you did not register on our platform, please ignore this email.</p>
+    <p>Thank you,<br> The Netizen Team</p>
+  </body>
+</html>

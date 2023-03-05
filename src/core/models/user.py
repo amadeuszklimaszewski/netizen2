@@ -72,4 +72,5 @@ class User(AppModel):
             "last_name": self.last_name,
             "email": self.email,
             "email_confirmation_token": self.email_confirmation_token,
+            "password_reset_token": self.password_reset_token,
         }
