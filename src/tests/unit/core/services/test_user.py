@@ -100,7 +100,7 @@ async def test_send_activation_email(
     expected_email = EmailSchema(
         subject="Thank you for registering - activate your account",
         recipients=(user.email,),
-        template_name="user_activation.html",
+        template_name="email_confirmation.html",
         context=user.get_email_context(),
     )
     assert user_service.email_service.send_email.mock_calls == [  # type: ignore
