@@ -31,13 +31,13 @@ class AuthService:
 
         return user
 
-    async def verify_user_credentials(self, credentials: UserCredentials) -> str:
-        try:
-            user = await self.repository.get_by_email(credentials.email)
-        except DoesNotExistError:
-            raise InvalidCredentialsError("Invalid credentials")
+    async def authenticate_user(self, credentials: UserCredentials) -> str:
+        user = await self.repository.get_by_email(credentials.email)
 
         if not user or not verify_password(credentials.password, user.password_hash):
             raise InvalidCredentialsError("Invalid credentials")
+
+        if not user.is_active:
+            raise UserNotActiveError("Please activate your account")
 
         return self.create_access_token(user)
