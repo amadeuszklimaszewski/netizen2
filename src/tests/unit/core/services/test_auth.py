@@ -1,3 +1,4 @@
+from datetime import date
 from uuid import uuid4
 
 import pytest
@@ -19,6 +20,7 @@ def create_user_schema() -> CreateUserSchema:
         email="test@example.com",
         password="password",
         repeat_password="password",
+        date_of_birth=date(1990, 1, 1),
     )
 
 

@@ -14,6 +14,9 @@ class AppSettings(BaseSettings):
     BASE_DIR: Path = Path(__file__).parents[1]
     TEMPLATE_FOLDER: Path = BASE_DIR / "templates"
 
+    MINIMUM_YEAR_OF_BIRTH: int = 1900
+    MINIMUM_AGE: int = 18
+
 
 class EmailSettings(BaseSettings):
     MAIL_FROM: str = "default@example.com"

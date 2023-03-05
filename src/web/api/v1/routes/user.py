@@ -8,7 +8,7 @@ from src.core.exceptions import (
     AlreadyExistsError,
     InvalidTokenError,
 )
-from src.core.schemas.user import CreateUserSchema
+from src.core.schemas.user import CreateUserSchema, UpdateUserSchema
 from src.core.services.auth import AuthService
 from src.core.services.user import UserService
 from src.web.api.v1.dependencies import (
@@ -95,6 +95,53 @@ async def get_user(
     user_service: UserService = Depends(get_user_service),
 ):
     return await user_service.get_user(user_id)
+
+
+@user_router.put(
+    "/{user_id}/",
+    tags=["users"],
+    status_code=status.HTTP_200_OK,
+    response_model=IDOnlyOutputSchema,
+)
+async def update_user(
+    user_id: UUID,
+    schema: UpdateUserSchema,
+    access_token: str = Depends(oauth2_scheme),
+    user_service: UserService = Depends(get_user_service),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    user = await auth_service.verify_access_token(access_token)
+
+    if user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not found",
+        )
+
+    await user_service.update_user(user, schema)
+    return user
+
+
+@user_router.delete(
+    "/{user_id}/",
+    tags=["users"],
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_user(
+    user_id: UUID,
+    access_token: str = Depends(oauth2_scheme),
+    user_service: UserService = Depends(get_user_service),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    user = await auth_service.verify_access_token(access_token)
+
+    if user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not found",
+        )
+
+    await user_service.delete_user(user)
 
 
 @user_router.post(

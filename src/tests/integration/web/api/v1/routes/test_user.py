@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID, uuid4
 
 import pytest
@@ -13,17 +14,18 @@ from src.core.services.user import UserService
 
 
 @pytest.fixture
-def create_user_data() -> dict[str, str]:
+def create_user_data() -> dict[str, Any]:
     return {
         "email": "user@example.com",
         "password": "password123",
         "repeat_password": "password123",
+        "date_of_birth": "1990-01-01",
     }
 
 
 @pytest_asyncio.fixture
 async def user(
-    create_user_data: dict[str, str],
+    create_user_data: dict[str, Any],
     user_service: UserService,
 ) -> User:
     schema = CreateUserSchema(**create_user_data)
@@ -34,7 +36,7 @@ async def user(
 
 @pytest_asyncio.fixture
 async def other_user(
-    create_user_data: dict[str, str],
+    create_user_data: dict[str, Any],
     user_service: UserService,
 ) -> User:
     create_user_data["email"] = "other@example.com"
@@ -118,6 +120,110 @@ async def test_get_user_by_id(
     assert body["id"] == str(user.id)
     assert body["email"] == user.email
     assert body["is_active"] == user.is_active
+
+
+@pytest.mark.asyncio
+async def test_get_user_by_id_not_found(
+    client: AsyncClient,
+    user: User,
+):
+    response: Response = await client.get(f"/users/{uuid4()}/")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Not found"}
+
+
+@pytest.mark.asyncio
+async def test_delete_user(
+    client: AsyncClient,
+    user: User,
+    user_bearer_token_header: dict[str, str],
+):
+    response: Response = await client.delete(
+        f"/users/{user.id}/",
+        headers=user_bearer_token_header,
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+@pytest.mark.asyncio
+async def test_delete_user_not_found(
+    client: AsyncClient,
+    user: User,
+    user_bearer_token_header: dict[str, str],
+):
+    response: Response = await client.delete(
+        f"/users/{uuid4()}/",
+        headers=user_bearer_token_header,
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Not found"}
+
+
+@pytest.mark.asyncio
+async def test_delete_user_unauthorized(
+    client: AsyncClient,
+    user: User,
+):
+    response: Response = await client.delete(f"/users/{user.id}/")
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json() == {"detail": "Not authenticated"}
+
+
+@pytest.mark.asyncio
+async def test_delete_user_other_user(
+    client: AsyncClient,
+    user: User,
+    other_user: User,
+    user_bearer_token_header: dict[str, str],
+):
+    response: Response = await client.delete(
+        f"/users/{other_user.id}/",
+        headers=user_bearer_token_header,
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Not found"}
+
+
+@pytest.mark.asyncio
+async def test_update_user(
+    client: AsyncClient,
+    user: User,
+    user_bearer_token_header: dict[str, str],
+):
+    update_user_data = {"first_name": "New Name", "last_name": "New Last Name"}
+    response: Response = await client.put(
+        f"/users/{user.id}/",
+        json=update_user_data,
+        headers=user_bearer_token_header,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    body = response.json()
+
+    assert body["id"] == str(user.id)
+
+
+@pytest.mark.asyncio
+async def test_update_user_other_user(
+    client: AsyncClient,
+    user: User,
+    other_user: User,
+    user_bearer_token_header: dict[str, str],
+):
+    update_user_data = {"first_name": "New Name", "last_name": "New Last Name"}
+    response: Response = await client.put(
+        f"/users/{other_user.id}/",
+        json=update_user_data,
+        headers=user_bearer_token_header,
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Not found"}
 
 
 @pytest.mark.asyncio

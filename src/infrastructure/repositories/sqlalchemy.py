@@ -50,8 +50,17 @@ class SQLAlchemyRepository(Generic[PK, Model], BaseRepository[PK, Model], ABC):
                 f"{self.__class__.__name__} could not persist {models}: one or more of the models already exists",
             )
 
-    async def update(self, model: Model) -> None:
-        update_data = model.dict(exclude={"id"})
+    async def update(
+        self,
+        model: Model,
+        *_,
+        fields_to_update: list[str] | None = None,
+    ) -> None:
+        if fields_to_update:
+            update_data = {field: getattr(model, field) for field in fields_to_update}
+        else:
+            update_data = model.dict(exclude={"id"})
+
         stmt = (
             update(self._table)
             .where(self._table.c.id == model.id)

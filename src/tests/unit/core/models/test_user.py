@@ -122,4 +122,5 @@ def test_get_email_context(user: User):
         "last_name": user.last_name,
         "email": user.email,
         "email_confirmation_token": user.email_confirmation_token,
+        "password_reset_token": user.password_reset_token,
     }

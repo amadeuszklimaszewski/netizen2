@@ -25,7 +25,12 @@ class BaseRepository(Generic[PK, Model], ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def update(self, model: Model) -> None:
+    async def update(
+        self,
+        model: Model,
+        *_,
+        fields_to_update: list[str] | None = None,
+    ) -> None:
         raise NotImplementedError
 
     @abstractmethod

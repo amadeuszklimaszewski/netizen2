@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from uuid import uuid4
 
 from src.core.exceptions import (
@@ -22,7 +22,7 @@ class User(AppModel):
 
     first_name: str | None = None
     last_name: str | None = None
-    date_of_birth: datetime | None = None
+    date_of_birth: date | None = None
 
     def generate_email_confirmation_token(self) -> str:
         self.email_confirmation_token = uuid4().hex

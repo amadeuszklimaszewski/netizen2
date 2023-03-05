@@ -36,7 +36,12 @@ class FakeUserRepository(UserRepository):
                 raise AlreadyExistsError("User already exists")
             self.users[user.id] = user
 
-    async def update(self, user: User) -> None:
+    async def update(
+        self,
+        user: User,
+        *_,
+        fields_to_update: list[str] | None = None,
+    ) -> None:
         self.users[user.id] = user
 
     async def delete(self, user: User) -> None:

@@ -1,3 +1,4 @@
+from datetime import date
 from uuid import uuid4
 
 import pytest
@@ -12,7 +13,7 @@ from src.core.exceptions import (
 )
 from src.core.models.user import User
 from src.core.schemas.email import EmailSchema
-from src.core.schemas.user import CreateUserSchema
+from src.core.schemas.user import CreateUserSchema, UpdateUserSchema
 from src.core.services.user import UserService
 
 
@@ -22,6 +23,16 @@ def create_user_schema() -> CreateUserSchema:
         email="test@example.com",
         password="password",
         repeat_password="password",
+        date_of_birth=date(1990, 1, 1),
+    )
+
+
+@pytest.fixture
+def update_user_schema() -> UpdateUserSchema:
+    return UpdateUserSchema(
+        first_name="John",
+        last_name="Doe",
+        date_of_birth=date(1990, 1, 1),
     )
 
 
@@ -74,6 +85,29 @@ async def test_get_users(user_service: UserService, user: User) -> None:
     users = await user_service.get_users()
 
     assert users == [user]
+
+
+@pytest.mark.asyncio
+async def test_update_user(
+    user_service: UserService,
+    user: User,
+    update_user_schema: UpdateUserSchema,
+) -> None:
+    await user_service.update_user(user, update_user_schema)
+
+    user = await user_service.get_user(user.id)
+
+    assert user.first_name == "John"
+    assert user.last_name == "Doe"
+    assert user.date_of_birth == date(1990, 1, 1)
+
+
+@pytest.mark.asyncio
+async def test_delete_user(user_service: UserService, user: User) -> None:
+    await user_service.delete_user(user)
+
+    with pytest.raises(DoesNotExistError):
+        await user_service.get_user(user.id)
 
 
 @pytest.mark.asyncio
