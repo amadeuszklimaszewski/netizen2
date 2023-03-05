@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, create_async_en
 
 from src.core.interfaces.email import EmailService
 from src.core.interfaces.repositories.user import UserRepository
+from src.core.services.auth import AuthService
 from src.core.services.user import UserService
 from src.infrastructure.database.metadata import metadata
 from src.infrastructure.database.tables import load_all_tables
@@ -62,6 +63,13 @@ def user_service(
     email_service: EmailService,
 ) -> UserService:
     return UserService(user_repository, email_service)
+
+
+@pytest.fixture
+def auth_service(
+    user_repository: UserRepository,
+) -> AuthService:
+    return AuthService(user_repository)
 
 
 @pytest.fixture

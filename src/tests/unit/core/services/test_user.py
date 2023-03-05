@@ -4,7 +4,12 @@ import pytest
 import pytest_asyncio
 from pytest_mock import MockerFixture
 
-from src.core.exceptions import AlreadyExistsError, DoesNotExistError, InvalidTokenError
+from src.core.exceptions import (
+    AlreadyActiveError,
+    AlreadyExistsError,
+    DoesNotExistError,
+    InvalidTokenError,
+)
 from src.core.models.user import User
 from src.core.schemas.email import EmailSchema
 from src.core.schemas.user import CreateUserSchema
@@ -107,6 +112,17 @@ async def test_send_activation_email(
 async def test_send_activation_email_does_not_exist(user_service: UserService) -> None:
     with pytest.raises(DoesNotExistError):
         await user_service.send_activation_email(uuid4())
+
+
+@pytest.mark.asyncio
+async def test_send_activation_email_already_active(
+    user_service: UserService,
+    user: User,
+) -> None:
+    user.activate()
+
+    with pytest.raises(AlreadyActiveError):
+        await user_service.send_activation_email(user.id)
 
 
 @pytest.mark.asyncio
