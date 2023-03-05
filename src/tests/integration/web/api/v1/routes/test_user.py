@@ -105,7 +105,7 @@ async def test_get_users(
     assert body[0]["is_active"] == user.is_active
 
 
-@pytest.mark.asyncioa
+@pytest.mark.asyncio
 async def test_get_user_by_id(
     client: AsyncClient,
     user: User,
