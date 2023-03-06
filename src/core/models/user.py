@@ -16,6 +16,8 @@ class User(AppModel):
     password_hash: str
 
     is_active: bool = False
+    is_superuser: bool = False
+
     email_confirmation_token: str | None = None
     password_reset_token: str | None = None
     password_reset_token_expires_at: datetime | None = None

@@ -95,8 +95,9 @@ async def test_create_user_already_exists(
 async def test_get_users(
     client: AsyncClient,
     user: User,
+    user_bearer_token_header: dict[str, str],
 ):
-    response: Response = await client.get("/users/")
+    response: Response = await client.get("/users/", headers=user_bearer_token_header)
 
     assert response.status_code == status.HTTP_200_OK
     body = response.json()
@@ -111,8 +112,12 @@ async def test_get_users(
 async def test_get_user_by_id(
     client: AsyncClient,
     user: User,
+    user_bearer_token_header: dict[str, str],
 ):
-    response: Response = await client.get(f"/users/{user.id}/")
+    response: Response = await client.get(
+        f"/users/{user.id}/",
+        headers=user_bearer_token_header,
+    )
 
     assert response.status_code == status.HTTP_200_OK
     body = response.json()
@@ -126,8 +131,12 @@ async def test_get_user_by_id(
 async def test_get_user_by_id_not_found(
     client: AsyncClient,
     user: User,
+    user_bearer_token_header: dict[str, str],
 ):
-    response: Response = await client.get(f"/users/{uuid4()}/")
+    response: Response = await client.get(
+        f"/users/{uuid4()}/",
+        headers=user_bearer_token_header,
+    )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"detail": "Not found"}
@@ -158,8 +167,8 @@ async def test_delete_user_not_found(
         headers=user_bearer_token_header,
     )
 
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Not found"}
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json() == {"detail": "Permission denied"}
 
 
 @pytest.mark.asyncio
@@ -185,8 +194,8 @@ async def test_delete_user_other_user(
         headers=user_bearer_token_header,
     )
 
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Not found"}
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json() == {"detail": "Permission denied"}
 
 
 @pytest.mark.asyncio
@@ -222,8 +231,8 @@ async def test_update_user_other_user(
         headers=user_bearer_token_header,
     )
 
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Not found"}
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json() == {"detail": "Permission denied"}
 
 
 @pytest.mark.asyncio
@@ -324,8 +333,8 @@ async def test_send_password_reset_email_other_user(
         headers=user_bearer_token_header,
     )
 
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Not found"}
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json() == {"detail": "Permission denied"}
 
 
 @pytest.mark.asyncio

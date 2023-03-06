@@ -7,6 +7,7 @@ from src.core.exceptions import (
     AlreadyActiveError,
     AlreadyExistsError,
     InvalidTokenError,
+    PermissionDeniedError,
 )
 from src.core.schemas.user import CreateUserSchema, UpdateUserSchema
 from src.core.services.auth import AuthService
@@ -33,8 +34,12 @@ user_router = APIRouter(prefix="/users")
     response_model=list[UserOutputSchema],
 )
 async def get_users(
+    access_token: str = Depends(oauth2_scheme),
     user_service: UserService = Depends(get_user_service),
+    auth_service: AuthService = Depends(get_auth_service),
 ):
+    await auth_service.verify_access_token(access_token)
+
     return await user_service.get_users()
 
 
@@ -92,8 +97,12 @@ async def unauthenticated_send_password_reset_email(
 )
 async def get_user(
     user_id: UUID,
+    access_token: str = Depends(oauth2_scheme),
     user_service: UserService = Depends(get_user_service),
+    auth_service: AuthService = Depends(get_auth_service),
 ):
+    await auth_service.verify_access_token(access_token)
+
     return await user_service.get_user(user_id)
 
 
@@ -112,11 +121,8 @@ async def update_user(
 ):
     user = await auth_service.verify_access_token(access_token)
 
-    if user.id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not found",
-        )
+    if user.id != user_id and not user.is_superuser:
+        raise PermissionDeniedError()
 
     await user_service.update_user(user, schema)
     return user
@@ -135,11 +141,8 @@ async def delete_user(
 ):
     user = await auth_service.verify_access_token(access_token)
 
-    if user.id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not found",
-        )
+    if user.id != user_id and not user.is_superuser:
+        raise PermissionDeniedError()
 
     await user_service.delete_user(user)
 
@@ -157,11 +160,8 @@ async def send_password_reset_email(
 ):
     user = await auth_service.verify_access_token(access_token)
 
-    if user.id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not found",
-        )
+    if user.id != user_id and not user.is_superuser:
+        raise PermissionDeniedError()
 
     await user_service.send_password_reset_email(user.email)
 

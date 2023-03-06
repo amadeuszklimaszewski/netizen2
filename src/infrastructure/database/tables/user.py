@@ -16,6 +16,7 @@ user_table = Table(
     Column("password_reset_token", String),
     Column("password_reset_token_expires_at", DateTime),
     Column("is_active", Boolean, default=False, nullable=False),
+    Column("is_superuser", Boolean, default=False, nullable=False),
     Column("created_at", DateTime, server_default=func.now()),
     Column("updated_at", DateTime, server_default=func.now(), onupdate=func.now()),
 )

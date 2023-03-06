@@ -6,6 +6,7 @@ from src.core.exceptions import (
     ExpiredAccessTokenError,
     InvalidAccessTokenError,
     InvalidCredentialsError,
+    PermissionDeniedError,
 )
 from src.web.api.v1.router import api_router
 
@@ -62,6 +63,16 @@ def get_app() -> FastAPI:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"detail": "Not found"},
+        )
+
+    @app.exception_handler(PermissionDeniedError)
+    async def permission_denied_exception_handler(
+        request: Request,
+        exc: PermissionDeniedError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"detail": "Permission denied"},
         )
 
     app.include_router(router=api_router, prefix="/api")
