@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from src.core.exceptions import AlreadyExistsError, DoesNotExistError
+from src.core.filters import FilterSet
 from src.core.interfaces.repositories.user import UserRepository
 from src.core.models.user import User
 
@@ -22,7 +23,7 @@ class FakeUserRepository(UserRepository):
 
         return None
 
-    async def get_many(self, **kwargs) -> list[User]:
+    async def get_many(self, filter_set: FilterSet | None = None) -> list[User]:
         return list(self.users.values())
 
     async def persist(self, user: User) -> None:

@@ -3,6 +3,8 @@ from typing import Generic, Type, TypeVar
 
 from pydantic import BaseModel
 
+from src.core.filters import FilterSet
+
 PK = TypeVar("PK")
 Model = TypeVar("Model", bound=BaseModel)
 
@@ -13,7 +15,7 @@ class BaseRepository(Generic[PK, Model], ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_many(self, **kwargs) -> list[Model]:
+    async def get_many(self, filter_set: FilterSet | None = None) -> list[Model]:
         raise NotImplementedError
 
     @abstractmethod

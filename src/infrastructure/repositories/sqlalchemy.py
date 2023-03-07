@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from src.core.exceptions import AlreadyExistsError, DoesNotExistError
+from src.core.filters import FilterSet, SQLAlchemyFilter
 from src.core.interfaces.repositories.base import BaseRepository
 from src.core.models.base import AppModel
 
@@ -26,9 +27,16 @@ class SQLAlchemyRepository(Generic[PK, Model], BaseRepository[PK, Model], ABC):
             )
         return self._model.from_orm(result)
 
-    async def get_many(self, **kwargs) -> list[Model]:
-        args = [getattr(self._table.c, key) == val for key, val in kwargs.items()]
-        stmt = select(self._table).where(*args)
+    async def get_many(self, filter_set: FilterSet | None = None) -> list[Model]:
+        exps = []
+        if filter_set:
+            sa_filters = [
+                SQLAlchemyFilter.from_filter(filter_)
+                for filter_ in filter_set.get_filters()
+            ]
+            exps = [filter_(self._table) for filter_ in sa_filters]
+
+        stmt = select(self._table).where(*exps)
         results = await self._conn.execute(stmt)
         return [self._model.from_orm(result) for result in results]
 
