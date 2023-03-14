@@ -8,7 +8,7 @@ user_table = Table(
     metadata,
     Column("id", UUID(as_uuid=True), primary_key=True),
     Column("email", String, unique=True, nullable=False),
-    Column("password", String, nullable=False),
+    Column("password_hash", String, nullable=False),
     Column("first_name", String),
     Column("last_name", String),
     Column("date_of_birth", Date),

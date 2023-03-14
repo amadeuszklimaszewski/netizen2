@@ -21,7 +21,7 @@ def upgrade() -> None:
         "user_login_data",
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("email", sa.String(), nullable=False),
-        sa.Column("password", sa.String(), nullable=False),
+        sa.Column("password_hash", sa.String(), nullable=False),
         sa.Column("first_name", sa.String(), nullable=True),
         sa.Column("last_name", sa.String(), nullable=True),
         sa.Column("date_of_birth", sa.Date(), nullable=True),

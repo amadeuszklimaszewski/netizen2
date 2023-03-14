@@ -3,7 +3,6 @@ from typing import Type
 
 from sqlalchemy import Table, select
 
-from src.core.exceptions import DoesNotExistError
 from src.core.interfaces.repositories.user import (
     UserRepository as AbstractUserRepository,
 )
@@ -20,7 +19,7 @@ class UserRepository(
         stmt = select(self._table).where(self._table.c.email == email).limit(1)
         result = (await self._conn.execute(stmt)).first()
         if not result:
-            raise DoesNotExistError("User does not exist")
+            return None
 
         return self._model.from_orm(result)
 
