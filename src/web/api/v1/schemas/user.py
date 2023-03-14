@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
@@ -11,7 +11,7 @@ class UserOutputSchema(BaseModel):
 
     first_name: str | None
     last_name: str | None
-    date_of_birth: datetime | None
+    date_of_birth: date | None
 
 
 class SendPasswordResetEmailSchema(BaseModel):
