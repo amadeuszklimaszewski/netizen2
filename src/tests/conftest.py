@@ -24,19 +24,23 @@ def anyio_backend() -> str:
     return "asyncio"
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture
 async def async_db_engine() -> AsyncGenerator[AsyncEngine, None]:
     load_all_tables()
 
     settings = Settings(TESTING=True)  # type: ignore
     engine = create_async_engine(settings.postgres_url)
     async with engine.begin() as conn:
+        await conn.run_sync(metadata.drop_all)
         await conn.run_sync(metadata.create_all)
 
     try:
         yield engine
     finally:
         await engine.dispose()
+
+    async with engine.begin() as conn:
+        await conn.run_sync(metadata.drop_all)
 
 
 @pytest_asyncio.fixture
@@ -45,6 +49,7 @@ async def async_db_connection(
 ) -> AsyncGenerator[AsyncConnection, None]:
     async with async_db_engine.begin() as conn:
         yield conn
+        await conn.rollback()
 
 
 @pytest.fixture
