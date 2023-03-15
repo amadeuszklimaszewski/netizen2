@@ -353,6 +353,22 @@ async def test_reset_password(
 
 
 @pytest.mark.asyncio
+async def test_reset_password_invalid_token(
+    user: User,
+    client: AsyncClient,
+):
+    user.generate_password_reset_token()
+    post_data = {"password": "new_password"}
+    response: Response = await client.post(
+        f"/users/{user.id}/password-reset/invalid-token/",
+        json=post_data,
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"detail": "Bad request"}
+
+
+@pytest.mark.asyncio
 async def test_resend_activation_email(
     user: User,
     client: AsyncClient,
@@ -362,6 +378,17 @@ async def test_resend_activation_email(
     response: Response = await client.post(f"/users/{user.id}/activate/send-email/")
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+@pytest.mark.asyncio
+async def test_resend_activation_email_already_active(
+    user: User,
+    client: AsyncClient,
+):
+    response: Response = await client.post(f"/users/{user.id}/activate/send-email/")
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"detail": "Bad request"}
 
 
 @pytest.mark.asyncio
@@ -377,3 +404,34 @@ async def test_confirm_email(
     )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+@pytest.mark.asyncio
+async def test_confirm_email_invalid_token(
+    user: User,
+    client: AsyncClient,
+):
+    user.deactivate()
+    user.generate_email_confirmation_token()
+
+    response: Response = await client.post(
+        f"/users/{user.id}/activate/invalid-token/",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"detail": "Bad request"}
+
+
+@pytest.mark.asyncio
+async def test_confirm_email_already_active(
+    user: User,
+    client: AsyncClient,
+):
+    user.generate_email_confirmation_token()
+
+    response: Response = await client.post(
+        f"/users/{user.id}/activate/{user.email_confirmation_token}/",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"detail": "Bad request"}
