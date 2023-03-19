@@ -15,17 +15,20 @@ ignore =
   ; Found too many base classes
   WPS237,
   ; Found too complex f-string
+  S106,
+  N805,
   WPS604,
   WPS420,
   WPS329,
-  N805,
   WPS120,
-  S106,
+  WPS218,
   WPS430,
   WPS118,
   WPS520,
   WPS212,
   WPS440,
+  WPS210,
+  WPS116,
   D100,
   ; Missing docstring in magic method
   D101,

@@ -8,7 +8,7 @@ from sqlalchemy import Table
 class Filter(BaseModel):
     field: str
     operator: Callable
-    value: str
+    value: int | float | bool | str
 
     def __call__(self, item):
         return self.operator(item[self.field], self.value)
@@ -42,10 +42,15 @@ class FilterSet(BaseModel):
         filters = []
         for key, value in self.dict(exclude_none=True).items():
             field, operator_ = key.split("__")
+            try:
+                operator_func = self._get_operator(operator_)
+            except KeyError:
+                raise ValueError(f"Invalid operator: {operator_}")
+
             filters.append(
                 Filter(
                     field=field,
-                    operator=self._get_operator(operator_),
+                    operator=operator_func,
                     value=value,
                 ),
             )
