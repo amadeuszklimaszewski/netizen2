@@ -32,7 +32,7 @@ class MailHogEmailClient(IEmailClient):
 
         self._send_message(msg)
 
-    def _send_message(self, message: EmailMessage):
+    def _send_message(self, message: EmailMessage) -> None:
         with smtplib.SMTP(self.server, self.port) as smtp_server:
             smtp_server.login(self.username, self.password)
             smtp_server.send_message(message)
