@@ -1,4 +1,6 @@
 import logging
+import smtplib
+from email.message import EmailMessage
 from typing import Any
 
 from jinja2 import Template
@@ -10,8 +12,30 @@ from src.settings import settings
 
 
 class ConsoleEmailClient(IEmailClient):
-    def send(self, email: EmailSchema, body: str) -> None:
-        logging.info(email, body)
+    def send(self, schema: EmailSchema, body: str) -> None:
+        logging.info(schema, body)
+
+
+class MailHogEmailClient(IEmailClient):
+    def __init__(self) -> None:
+        self.server = settings.MAIL_SERVER
+        self.port = settings.MAIL_PORT
+        self.username = settings.MAIL_USERNAME
+        self.password = settings.MAIL_PASSWORD
+
+    def send(self, schema: EmailSchema, body: str) -> None:
+        msg = EmailMessage()
+        msg["From"] = schema.from_email
+        msg["To"] = ", ".join(schema.recipients)
+        msg["Subject"] = schema.subject
+        msg.add_alternative(body, subtype="html")
+
+        self._send_message(msg)
+
+    def _send_message(self, message: EmailMessage):
+        with smtplib.SMTP(self.server, self.port) as smtp_server:
+            smtp_server.login(self.username, self.password)
+            smtp_server.send_message(message)
 
 
 class EmailService(IEmailService):

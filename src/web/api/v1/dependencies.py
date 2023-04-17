@@ -8,7 +8,7 @@ from src.core.interfaces.repositories.user import UserRepository as IUserReposit
 from src.core.services.auth import AuthService
 from src.core.services.user import UserService
 from src.infrastructure.database.connection import get_db
-from src.infrastructure.email import ConsoleEmailClient, EmailService
+from src.infrastructure.email import EmailService, MailHogEmailClient
 from src.infrastructure.repositories.user import UserRepository
 from src.settings import settings
 
@@ -21,7 +21,7 @@ def get_user_repository(conn: AsyncConnection = Depends(get_db)) -> IUserReposit
 
 def get_email_client() -> IEmailClient:
     if settings.ENVIRONMENT == "development":
-        return ConsoleEmailClient()
+        return MailHogEmailClient()
 
     raise NotImplementedError
 
