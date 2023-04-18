@@ -14,7 +14,7 @@ from src.core.services.user import UserService
 
 
 @pytest.fixture
-def create_user_data() -> dict[str, Any]:
+def create_user_data() -> dict[str, str]:
     return {
         "email": "user@example.com",
         "password": "password123",

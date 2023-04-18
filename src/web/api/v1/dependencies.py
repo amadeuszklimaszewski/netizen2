@@ -12,7 +12,7 @@ from src.infrastructure.email import EmailService, MailHogEmailClient
 from src.infrastructure.repositories.user import UserRepository
 from src.settings import settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/auth/login/")
 
 
 def get_user_repository(conn: AsyncConnection = Depends(get_db)) -> IUserRepository:
