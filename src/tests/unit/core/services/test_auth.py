@@ -91,9 +91,9 @@ async def test_authenticate_user(
     user.activate()
 
     credentials = UserCredentials(email=user.email, password="password")
-    access_token = await auth_service.authenticate_user(credentials)
+    token = await auth_service.authenticate_user(credentials)
 
-    payload = decode_jwt(access_token)
+    payload = decode_jwt(token.access_token)
     assert payload.sub == user.id
 
 

@@ -5,7 +5,7 @@ from src.core.exceptions import (
 )
 from src.core.interfaces.repositories.user import UserRepository
 from src.core.models.user import User
-from src.core.schemas.auth import UserCredentials
+from src.core.schemas.auth import AccessToken, UserCredentials
 from src.core.schemas.jwt import JWTPayload
 from src.core.services.jwt import decode_jwt, encode_jwt
 from src.core.utils import verify_password
@@ -19,7 +19,7 @@ class AuthService:
         payload = JWTPayload(sub=user.id)
         return encode_jwt(payload)
 
-    async def verify_access_token(self, auth_token) -> User:
+    async def verify_access_token(self, auth_token: str) -> User:
         payload = decode_jwt(auth_token)
         try:
             user = await self.repository.get(payload.sub)
@@ -31,7 +31,7 @@ class AuthService:
 
         return user
 
-    async def authenticate_user(self, credentials: UserCredentials) -> str:
+    async def authenticate_user(self, credentials: UserCredentials) -> AccessToken:
         user = await self.repository.get_by_email(credentials.email)
 
         if not user or not verify_password(credentials.password, user.password_hash):
@@ -40,4 +40,5 @@ class AuthService:
         if not user.is_active:
             raise UserNotActiveError("Please activate your account")
 
-        return self.create_access_token(user)
+        token = self.create_access_token(user)
+        return AccessToken(access_token=token, token_type="bearer")
