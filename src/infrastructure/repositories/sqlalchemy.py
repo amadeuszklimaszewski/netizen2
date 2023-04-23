@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic, Type, TypeVar
 
-from sqlalchemy import Table, delete, insert, select, update
+from sqlalchemy import CursorResult, Table, delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
@@ -37,7 +37,7 @@ class SQLAlchemyRepository(Generic[PK, Model], BaseRepository[PK, Model], ABC):
             exps = [filter_(self._table) for filter_ in sa_filters]
 
         stmt = select(self._table).where(*exps)
-        results = await self._conn.execute(stmt)
+        results: CursorResult = await self._conn.execute(stmt)
         return [self._model.from_orm(result) for result in results]
 
     async def persist(self, model: Model) -> None:

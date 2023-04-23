@@ -3,8 +3,7 @@ from fastapi.routing import APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 
 from src.core.schemas.auth import AccessToken, UserCredentials
-from src.core.services.auth import AuthService
-from src.web.api.v1.dependencies import get_auth_service
+from src.web.api.v1.annotations import AuthService
 
 auth_router = APIRouter(prefix="/auth")
 
@@ -16,8 +15,8 @@ auth_router = APIRouter(prefix="/auth")
     response_model=AccessToken,
 )
 async def authenticate_user(
+    auth_service: AuthService,
     credentials: OAuth2PasswordRequestForm = Depends(),
-    auth_service: AuthService = Depends(get_auth_service),
 ):
     user_credentials = UserCredentials(
         email=credentials.username,

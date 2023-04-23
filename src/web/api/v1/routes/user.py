@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from fastapi.routing import APIRouter
 
 from src.core.exceptions import (
@@ -10,13 +10,7 @@ from src.core.exceptions import (
     PermissionDeniedError,
 )
 from src.core.schemas.user import CreateUserSchema, UpdateUserSchema
-from src.core.services.auth import AuthService
-from src.core.services.user import UserService
-from src.web.api.v1.dependencies import (
-    get_auth_service,
-    get_user_service,
-    oauth2_scheme,
-)
+from src.web.api.v1.annotations import AccessToken, AuthService, UserService
 from src.web.api.v1.schemas.base import IDOnlyOutputSchema
 from src.web.api.v1.schemas.user import (
     PasswordResetSchema,
@@ -34,9 +28,9 @@ user_router = APIRouter(prefix="/users")
     response_model=list[UserOutputSchema],
 )
 async def get_users(
-    access_token: str = Depends(oauth2_scheme),
-    user_service: UserService = Depends(get_user_service),
-    auth_service: AuthService = Depends(get_auth_service),
+    access_token: AccessToken,
+    user_service: UserService,
+    auth_service: AuthService,
 ):
     await auth_service.verify_access_token(access_token)
 
@@ -51,7 +45,7 @@ async def get_users(
 )
 async def create_user(
     create_user_schema: CreateUserSchema,
-    user_service: UserService = Depends(get_user_service),
+    user_service: UserService,
 ):
     try:
         user = await user_service.create_user(create_user_schema)
@@ -71,8 +65,8 @@ async def create_user(
     response_model=UserOutputSchema,
 )
 async def get_current_user(
-    access_token: str = Depends(oauth2_scheme),
-    auth_service: AuthService = Depends(get_auth_service),
+    access_token: AccessToken,
+    auth_service: AuthService,
 ):
     return await auth_service.verify_access_token(access_token)
 
@@ -84,7 +78,7 @@ async def get_current_user(
 )
 async def unauthenticated_send_password_reset_email(
     schema: SendPasswordResetEmailSchema,
-    user_service: UserService = Depends(get_user_service),
+    user_service: UserService,
 ):
     await user_service.send_password_reset_email(schema.email)
 
@@ -97,9 +91,9 @@ async def unauthenticated_send_password_reset_email(
 )
 async def get_user(
     user_id: UUID,
-    access_token: str = Depends(oauth2_scheme),
-    user_service: UserService = Depends(get_user_service),
-    auth_service: AuthService = Depends(get_auth_service),
+    access_token: AccessToken,
+    user_service: UserService,
+    auth_service: AuthService,
 ):
     await auth_service.verify_access_token(access_token)
 
@@ -115,9 +109,9 @@ async def get_user(
 async def update_user(
     user_id: UUID,
     schema: UpdateUserSchema,
-    access_token: str = Depends(oauth2_scheme),
-    user_service: UserService = Depends(get_user_service),
-    auth_service: AuthService = Depends(get_auth_service),
+    access_token: AccessToken,
+    user_service: UserService,
+    auth_service: AuthService,
 ):
     user = await auth_service.verify_access_token(access_token)
 
@@ -135,9 +129,9 @@ async def update_user(
 )
 async def delete_user(
     user_id: UUID,
-    access_token: str = Depends(oauth2_scheme),
-    user_service: UserService = Depends(get_user_service),
-    auth_service: AuthService = Depends(get_auth_service),
+    access_token: AccessToken,
+    user_service: UserService,
+    auth_service: AuthService,
 ):
     user = await auth_service.verify_access_token(access_token)
 
@@ -154,9 +148,9 @@ async def delete_user(
 )
 async def send_password_reset_email(
     user_id: UUID,
-    access_token: str = Depends(oauth2_scheme),
-    user_service: UserService = Depends(get_user_service),
-    auth_service: AuthService = Depends(get_auth_service),
+    access_token: AccessToken,
+    user_service: UserService,
+    auth_service: AuthService,
 ):
     user = await auth_service.verify_access_token(access_token)
 
@@ -175,7 +169,7 @@ async def reset_password(
     user_id: UUID,
     token: str,
     schema: PasswordResetSchema,
-    user_service: UserService = Depends(get_user_service),
+    user_service: UserService,
 ):
     try:
         await user_service.reset_password(user_id, token, schema.password)
@@ -193,7 +187,7 @@ async def reset_password(
 )
 async def resend_activation_email(
     user_id: UUID,
-    user_service: UserService = Depends(get_user_service),
+    user_service: UserService,
 ):
     try:
         await user_service.send_activation_email(user_id)
@@ -212,7 +206,7 @@ async def resend_activation_email(
 async def confirm_email(
     user_id: UUID,
     email_confirmation_token: str,
-    user_service: UserService = Depends(get_user_service),
+    user_service: UserService,
 ):
     try:
         await user_service.confirm_email(user_id, email_confirmation_token)
