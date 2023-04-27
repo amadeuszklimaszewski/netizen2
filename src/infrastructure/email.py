@@ -16,7 +16,7 @@ class ConsoleEmailClient(IEmailClient):
         logging.info(schema, body)
 
 
-class MailHogEmailClient(IEmailClient):
+class SMTPClient(IEmailClient):
     def __init__(self) -> None:
         self.server = settings.MAIL_SERVER
         self.port = settings.MAIL_PORT
