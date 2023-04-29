@@ -24,10 +24,16 @@ def upgrade() -> None:
         sa.Column("description", sa.String(length=1000), nullable=True),
         sa.Column("is_private", sa.Boolean(), nullable=False),
         sa.Column(
-            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True
+            "created_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
         ),
         sa.Column(
-            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True
+            "updated_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
         ),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -39,10 +45,16 @@ def upgrade() -> None:
         sa.Column("is_admin", sa.Boolean(), nullable=False),
         sa.Column("is_owner", sa.Boolean(), nullable=False),
         sa.Column(
-            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True
+            "created_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
         ),
         sa.Column(
-            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True
+            "updated_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
         ),
         sa.ForeignKeyConstraint(["group_id"], ["group.id"]),
         sa.ForeignKeyConstraint(["user_id"], ["user.id"]),
@@ -60,10 +72,16 @@ def upgrade() -> None:
         ),
         sa.Column("message", sa.String(length=250), nullable=True),
         sa.Column(
-            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True
+            "created_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
         ),
         sa.Column(
-            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True
+            "updated_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
         ),
         sa.ForeignKeyConstraint(["group_id"], ["group.id"]),
         sa.ForeignKeyConstraint(["user_id"], ["user.id"]),
