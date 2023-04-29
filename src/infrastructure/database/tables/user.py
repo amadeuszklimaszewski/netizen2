@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from src.infrastructure.database.metadata import metadata
 
 user_table = Table(
-    "user_login_data",
+    "user",
     metadata,
     Column("id", UUID(as_uuid=True), primary_key=True),
     Column("email", String, unique=True, nullable=False),
