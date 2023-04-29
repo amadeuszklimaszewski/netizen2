@@ -10,8 +10,10 @@ up-dev:
 	docker compose run --rm web bash -c "alembic upgrade head"
 	docker compose up
 
-migrations:
+makemigrations:
 	docker compose run --rm web bash -c "alembic revision --autogenerate"
+
+migrate:
 	docker compose run --rm web bash -c "alembic upgrade head"
 
 bash:
