@@ -64,10 +64,26 @@ class SQLAlchemyRepository(Generic[PK, Model], BaseRepository[PK, Model], ABC):
         *_,
         fields_to_update: list[str] | None = None,
     ) -> None:
+        """
+        Update a row in the corresponding table for the given model.
+
+        :param model: The model instance to update in the database.
+        :param fields_to_update: An optional list of field names to update.
+            If specified, only the given fields will be updated in the database.
+            If not specified, all fields except for 'id', 'created_at', and 'updated_at'
+            will be updated in the database.
+
+        Note: This method ignores the 'created_at' and 'updated_at' fields as these fields are
+        automatically set by the database.
+        """
         if fields_to_update:
-            update_data = {field: getattr(model, field) for field in fields_to_update}
+            update_data = {
+                field: getattr(model, field)
+                for field in fields_to_update
+                if field not in {"created_at", "updated_at"}
+            }
         else:
-            update_data = model.dict(exclude={"id"})
+            update_data = model.dict(exclude={"id", "created_at", "updated_at"})
 
         stmt = (
             update(self._table)

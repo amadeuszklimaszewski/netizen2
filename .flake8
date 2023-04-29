@@ -102,6 +102,7 @@ ignore =
   WPS407,
   ; Found too many empty lines in `def`
   WPS473,
+  DAR101,
 
 per-file-ignores =
   ; all tests
