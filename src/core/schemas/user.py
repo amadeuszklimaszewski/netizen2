@@ -3,6 +3,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, validate_email, validator
 
+from src.core.schemas.base import BaseUpdateSchema
 from src.settings import settings
 
 
@@ -45,11 +46,7 @@ class CreateUserSchema(DateOfBirthInputSchema):
         return repeat_password
 
 
-class UpdateUserSchema(DateOfBirthInputSchema):
+class UpdateUserSchema(DateOfBirthInputSchema, BaseUpdateSchema):
     first_name: str | None = None
     last_name: str | None = None
     date_of_birth: date | None = None  # type: ignore
-
-    def dict(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
-        kwargs.setdefault("exclude_unset", True)
-        return super().dict(*args, **kwargs)
