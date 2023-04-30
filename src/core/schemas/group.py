@@ -3,7 +3,6 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from src.constants import constants
-from src.core.enums.group import GroupRequestStatus
 from src.core.schemas.base import BaseUpdateSchema
 
 
@@ -31,17 +30,8 @@ class CreateGroupRequestSchema(BaseModel):
     )
 
 
-class UpdateGroupRequestSchema(BaseUpdateSchema):
-    status: GroupRequestStatus
-
-
 class CreateGroupMemberSchema(BaseModel):
     user_id: UUID
     group_id: UUID
     is_admin: bool = False
     is_owner: bool = False
-
-
-class UpdateGroupMemberSchema(BaseUpdateSchema):
-    is_admin: bool | None
-    is_owner: bool | None

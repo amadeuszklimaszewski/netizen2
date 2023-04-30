@@ -3,7 +3,7 @@ from typing import Generic, Type, TypeVar
 
 from pydantic import BaseModel
 
-from src.core.filters import FilterSet
+from src.core.filters.base import FilterSet
 
 PK = TypeVar("PK")
 Model = TypeVar("Model", bound=BaseModel)
