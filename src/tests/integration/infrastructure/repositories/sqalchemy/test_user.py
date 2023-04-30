@@ -142,9 +142,12 @@ async def test_delete_user(user_repository: UserRepository, user: User):
 @pytest.mark.asyncio
 async def test_update_user(user_repository: UserRepository, user: User):
     user.email = "new@example.com"
-    await user_repository.update(user)
+    await user_repository.update(user, fields_to_update=["email"])
     result = await user_repository.get_by_email(user.email)
-    assert result == user
+
+    assert result is not None
+    assert result.email == user.email
+    assert result.first_name == user.first_name
 
 
 @pytest.mark.asyncio

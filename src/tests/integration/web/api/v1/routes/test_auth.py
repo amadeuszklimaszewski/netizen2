@@ -37,7 +37,7 @@ async def user(
     return user
 
 
-@pytest.mark.asycnio
+@pytest.mark.asyncio
 async def test_authenticate_user(
     client: AsyncClient,
     user: User,

@@ -5,7 +5,7 @@ import pytest
 from src.core.filters.base import Filter, FilterSet, SQLAlchemyFilter
 
 
-class TestFilterSet(FilterSet):
+class FilterSetTest(FilterSet):
     field1__eq: str | None
     field2__gt: int | None
     field3__lt: int | None
@@ -13,7 +13,7 @@ class TestFilterSet(FilterSet):
 
 @pytest.fixture
 def filterset():
-    return TestFilterSet(
+    return FilterSetTest(
         field1__eq="value1",
         field2__gt=2,
         field3__lt=3,

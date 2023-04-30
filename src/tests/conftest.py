@@ -7,13 +7,24 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, create_async_engine
 
 from src.core.interfaces.email import EmailService
+from src.core.interfaces.repositories.group import (
+    GroupMemberRepository,
+    GroupRepository,
+    GroupRequestRepository,
+)
 from src.core.interfaces.repositories.user import UserRepository
 from src.core.services.auth import AuthService
+from src.core.services.group import GroupService
 from src.core.services.user import UserService
 from src.infrastructure.database.metadata import metadata
 from src.infrastructure.database.tables import load_all_tables
 from src.settings import Settings
 from src.tests.fakes.email import FakeEmailService
+from src.tests.fakes.repositories.group import (
+    FakeGroupMemberRepository,
+    FakeGroupRepository,
+    FakeGroupRequestRepository,
+)
 from src.tests.fakes.repositories.user import FakeUserRepository
 from src.web.api.v1.dependencies import get_email_service, get_user_repository
 from src.web.application import get_app
@@ -58,11 +69,6 @@ def user_repository() -> UserRepository:
 
 
 @pytest.fixture
-def email_service() -> EmailService:
-    return FakeEmailService()
-
-
-@pytest.fixture
 def user_service(
     user_repository: UserRepository,
     email_service: EmailService,
@@ -75,6 +81,39 @@ def auth_service(
     user_repository: UserRepository,
 ) -> AuthService:
     return AuthService(user_repository)
+
+
+@pytest.fixture
+def group_repository() -> GroupRepository:
+    return FakeGroupRepository()
+
+
+@pytest.fixture
+def group_member_repository() -> GroupMemberRepository:
+    return FakeGroupMemberRepository()
+
+
+@pytest.fixture
+def group_request_repository() -> GroupRequestRepository:
+    return FakeGroupRequestRepository()
+
+
+@pytest.fixture
+def group_service(
+    group_repository: GroupRepository,
+    group_member_repository: GroupMemberRepository,
+    group_request_repository: GroupRequestRepository,
+) -> GroupService:
+    return GroupService(
+        group_repository,
+        group_member_repository,
+        group_request_repository,
+    )
+
+
+@pytest.fixture
+def email_service() -> EmailService:
+    return FakeEmailService()
 
 
 @pytest.fixture
