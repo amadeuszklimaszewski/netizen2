@@ -1,4 +1,4 @@
-"""empty message
+"""Add group tables
 
 Revision ID: 9d9479b33ccb
 Revises: 082660dbd0b1
