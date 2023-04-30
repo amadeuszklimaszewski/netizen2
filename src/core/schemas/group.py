@@ -8,22 +8,18 @@ from src.core.schemas.base import BaseUpdateSchema
 
 
 class CreateGroupSchema(BaseModel):
-    owner_id: UUID
-    is_private: bool = False
-
     name: str = Field(max_length=constants.MAX_GROUP_NAME_LENGTH)
     description: str | None = Field(
         default=None,
         max_length=constants.MAX_GROUP_DESCRIPTION_LENGTH,
     )
+    is_private: bool = False
 
 
 class UpdateGroupSchema(BaseUpdateSchema):
-    owner_id: bool | None
-    is_private: bool | None
-
     name: str | None = Field(max_length=constants.MAX_GROUP_NAME_LENGTH)
     description: str | None = Field(max_length=constants.MAX_GROUP_DESCRIPTION_LENGTH)
+    is_private: bool | None
 
 
 class CreateGroupRequestSchema(BaseModel):
@@ -42,8 +38,10 @@ class UpdateGroupRequestSchema(BaseUpdateSchema):
 class CreateGroupMemberSchema(BaseModel):
     user_id: UUID
     group_id: UUID
-    is_admin: bool
+    is_admin: bool = False
+    is_owner: bool = False
 
 
 class UpdateGroupMemberSchema(BaseUpdateSchema):
     is_admin: bool | None
+    is_owner: bool | None

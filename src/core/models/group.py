@@ -5,11 +5,9 @@ from src.core.models.base import AppModel
 
 
 class Group(AppModel):
-    owner_id: UUID
-    is_private: bool = False
-
     name: str
     description: str | None = None
+    is_private: bool = False
 
 
 class GroupMember(AppModel):
