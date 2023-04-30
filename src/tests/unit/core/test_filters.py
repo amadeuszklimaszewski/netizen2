@@ -2,7 +2,7 @@ import operator
 
 import pytest
 
-from src.core.filters import Filter, FilterSet, SQLAlchemyFilter
+from src.core.filters.base import Filter, FilterSet, SQLAlchemyFilter
 
 
 class TestFilterSet(FilterSet):

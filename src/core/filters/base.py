@@ -1,5 +1,6 @@
 import operator
 from typing import Callable
+from uuid import UUID
 
 from pydantic import BaseModel
 from sqlalchemy import Table
@@ -8,7 +9,7 @@ from sqlalchemy import Table
 class Filter(BaseModel):
     field: str
     operator: Callable
-    value: int | float | bool | str
+    value: int | float | bool | str | UUID
 
     def __call__(self, item):
         return self.operator(item[self.field], self.value)
@@ -40,7 +41,7 @@ class FilterSet(BaseModel):
 
     def get_filters(self) -> list[Filter]:
         filters = []
-        for key, value in self.dict(exclude_none=True).items():
+        for key, value in self.dict(exclude_none=True, exclude_unset=True).items():
             field, operator_ = key.split("__")
             try:
                 operator_func = self._get_operator(operator_)

@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from src.core.exceptions import AlreadyExistsError, DoesNotExistError
-from src.core.filters import FilterSet, SQLAlchemyFilter
+from src.core.filters.base import FilterSet, SQLAlchemyFilter
 from src.core.interfaces.repositories.base import BaseRepository
 from src.core.models.base import AppModel
 
