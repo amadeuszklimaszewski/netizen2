@@ -22,7 +22,15 @@ class FakeGroupRepository(GroupRepository):
             raise DoesNotExistError("Group does not exist")
 
     async def get_many(self, filter_set: FilterSet | None = None) -> list[Group]:
-        return list(self.groups.values())
+        groups = list(self.groups.values())
+
+        if filter_set:
+            filters = filter_set.get_filters()
+            groups = [
+                group for group in groups if all(filter_(group) for filter_ in filters)
+            ]
+
+        return groups
 
     async def persist(self, group: Group) -> None:
         if group.id in self.groups:
@@ -65,7 +73,17 @@ class FakeGroupRequestRepository(GroupRequestRepository):
         self,
         filter_set: FilterSet | None = None,
     ) -> list[GroupRequest]:
-        return list(self.group_requests.values())
+        group_requests = list(self.group_requests.values())
+
+        if filter_set:
+            filters = filter_set.get_filters()
+            group_requests = [
+                group_request
+                for group_request in group_requests
+                if all(filter_(group_request) for filter_ in filters)
+            ]
+
+        return group_requests
 
     async def persist(self, group_request: GroupRequest) -> None:
         if group_request.id in self.group_requests:
@@ -123,7 +141,17 @@ class FakeGroupMemberRepository(GroupMemberRepository):
         self,
         filter_set: FilterSet | None = None,
     ) -> list[GroupMember]:
-        return list(self.group_members.values())
+        group_members = list(self.group_members.values())
+
+        if filter_set:
+            filters = filter_set.get_filters()
+            group_members = [
+                group_member
+                for group_member in group_members
+                if all(filter_(group_member) for filter_ in filters)
+            ]
+
+        return group_members
 
     async def persist(self, group_member: GroupMember) -> None:
         if group_member.id in self.group_members:

@@ -12,7 +12,7 @@ class Filter(BaseModel):
     value: int | float | bool | str | UUID
 
     def __call__(self, item):
-        return self.operator(item[self.field], self.value)
+        return self.operator(getattr(item, self.field), self.value)
 
 
 class SQLAlchemyFilter(Filter):

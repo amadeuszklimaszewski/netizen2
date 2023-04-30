@@ -26,7 +26,7 @@ def test_filter():
         operator=operator.eq,
         value=1,
     )
-    item = {"field": 1}
+    item = type("Item", (), {"field": 1})()
 
     assert filter_(item) is True
 
