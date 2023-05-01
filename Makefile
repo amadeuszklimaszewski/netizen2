@@ -3,7 +3,7 @@ postgres-database = postgres
 
 
 build-dev:
-	-cp -n ./config/.env.template ./.env
+	-cp -n ./.env.template ./.env
 	docker compose build
 
 up-dev:
