@@ -1,5 +1,6 @@
 # netizen2
 WIP second version of Netizen, a FastAPI app that aims to recreate the backend for a simple social-network website. Uses SQLAlchemy for database access. Containerized with Docker and secured with JWT.
+Inspired by hexagonal and clean architecture, altered to fit my preferences.
 
 ## Tech stack
 * FastAPI `0.95.1`
