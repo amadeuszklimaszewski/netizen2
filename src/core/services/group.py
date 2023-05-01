@@ -79,11 +79,13 @@ class GroupService:
 
         await self.group_repository.update(group, fields_to_update)
 
-    async def delete_group(self, request_user_id: UUID, group: Group) -> None:
+    async def delete_group(self, request_user_id: UUID, group_id: UUID) -> None:
+        group = await self.group_repository.get(group_id)
+
         try:
             member = await self.member_repository.get_by_user_and_group_id(
                 user_id=request_user_id,
-                group_id=group.id,
+                group_id=group_id,
             )
         except DoesNotExistError:
             raise PermissionDeniedError("Is not a member of the group")
@@ -108,12 +110,14 @@ class GroupService:
 
     async def create_group_request(
         self,
+        user_id: UUID,
+        group_id: UUID,
         schema: CreateGroupRequestSchema,
     ) -> GroupRequest:
         try:
             await self.request_repository.get_pending_request_by_user_and_group_id(
-                user_id=schema.user_id,
-                group_id=schema.group_id,
+                user_id=user_id,
+                group_id=group_id,
             )
             raise AlreadyExistsError("Already requested to join the group")
         except DoesNotExistError:
@@ -121,14 +125,18 @@ class GroupService:
 
         try:
             await self.member_repository.get_by_user_and_group_id(
-                user_id=schema.user_id,
-                group_id=schema.group_id,
+                user_id=user_id,
+                group_id=group_id,
             )
             raise AlreadyExistsError("Already a member of the group")
         except DoesNotExistError:
             pass
 
-        group_request = GroupRequest(**schema.dict())
+        group_request = GroupRequest(
+            user_id=user_id,
+            group_id=group_id,
+            **schema.dict(),
+        )
         await self.request_repository.persist(group_request)
         return group_request
 

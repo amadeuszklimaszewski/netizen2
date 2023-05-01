@@ -99,11 +99,9 @@ async def other_user_group_request(
     group_service: GroupService,
 ) -> GroupRequest:
     schema = CreateGroupRequestSchema(
-        user_id=other_user.id,
-        group_id=group.id,
         message="Test message",
     )
-    return await group_service.create_group_request(schema)
+    return await group_service.create_group_request(other_user.id, group.id, schema)
 
 
 @pytest.mark.asyncio
@@ -182,7 +180,7 @@ async def test_delete_group(
     group: Group,
     group_service: GroupService,
 ) -> None:
-    await group_service.delete_group(user.id, group)
+    await group_service.delete_group(user.id, group.id)
 
     with pytest.raises(DoesNotExistError):
         await group_service.get_group(group.id)
@@ -195,7 +193,7 @@ async def test_delete_group_other_user(
     group_service: GroupService,
 ) -> None:
     with pytest.raises(PermissionDeniedError):
-        await group_service.delete_group(other_user.id, group)
+        await group_service.delete_group(other_user.id, group.id)
 
 
 @pytest.mark.asyncio
@@ -206,7 +204,7 @@ async def test_delete_group_other_member(
     group_service: GroupService,
 ) -> None:
     with pytest.raises(PermissionDeniedError):
-        await group_service.delete_group(other_user.id, group)
+        await group_service.delete_group(other_user.id, group.id)
 
 
 @pytest.mark.asyncio
@@ -218,7 +216,7 @@ async def test_delete_group_other_member_is_admin(
 ) -> None:
     other_user_group_member.is_admin = True
     with pytest.raises(PermissionDeniedError):
-        await group_service.delete_group(other_user.id, group)
+        await group_service.delete_group(other_user.id, group.id)
 
 
 @pytest.mark.asyncio
@@ -267,13 +265,9 @@ async def test_create_group_request(
     group: Group,
     group_service: GroupService,
 ) -> None:
-    schema = CreateGroupRequestSchema(
-        user_id=other_user.id,
-        group_id=group.id,
-        message="Test message",
-    )
+    schema = CreateGroupRequestSchema(message="Test message")
 
-    request = await group_service.create_group_request(schema)
+    request = await group_service.create_group_request(other_user.id, group.id, schema)
 
     assert request.user_id == other_user.id
     assert request.group_id == group.id
@@ -286,14 +280,10 @@ async def test_create_group_request_already_member(
     group: Group,
     group_service: GroupService,
 ) -> None:
-    schema = CreateGroupRequestSchema(
-        user_id=user.id,
-        group_id=group.id,
-        message="Test message",
-    )
+    schema = CreateGroupRequestSchema(message="Test message")
 
     with pytest.raises(AlreadyExistsError):
-        await group_service.create_group_request(schema)
+        await group_service.create_group_request(user.id, group.id, schema)
 
 
 @pytest.mark.asyncio
@@ -302,16 +292,12 @@ async def test_create_group_request_already_requested(
     group: Group,
     group_service: GroupService,
 ) -> None:
-    schema = CreateGroupRequestSchema(
-        user_id=other_user.id,
-        group_id=group.id,
-        message="Test message",
-    )
+    schema = CreateGroupRequestSchema(message="Test message")
 
-    await group_service.create_group_request(schema)
+    await group_service.create_group_request(other_user.id, group.id, schema)
 
     with pytest.raises(AlreadyExistsError):
-        await group_service.create_group_request(schema)
+        await group_service.create_group_request(other_user.id, group.id, schema)
 
 
 @pytest.mark.asyncio
@@ -365,7 +351,6 @@ async def test_update_group_request_wrong_group_id(
 async def test_update_group_request_wrong_request_id(
     user: User,
     group: Group,
-    other_user_group_request: GroupRequest,
     group_service: GroupService,
 ) -> None:
     schema = UpdateGroupRequestSchema(
@@ -383,7 +368,6 @@ async def test_update_group_request_wrong_request_id(
 
 @pytest.mark.asyncio
 async def test_update_group_request_wrong_user_id(
-    user: User,
     group: Group,
     other_user_group_request: GroupRequest,
     group_service: GroupService,
@@ -546,7 +530,6 @@ async def test_delete_group_request_wrong_group_id(
 async def test_delete_group_request_wrong_request_id(
     other_user: User,
     group: Group,
-    other_user_group_request: GroupRequest,
     group_service: GroupService,
 ) -> None:
     with pytest.raises(DoesNotExistError):
@@ -559,7 +542,6 @@ async def test_delete_group_request_wrong_request_id(
 
 @pytest.mark.asyncio
 async def test_delete_group_request_wrong_user_id(
-    other_user: User,
     group: Group,
     other_user_group_request: GroupRequest,
     group_service: GroupService,
@@ -653,7 +635,6 @@ async def test_get_group_requests_by_requesting_user(
 
 @pytest.mark.asyncio
 async def test_get_group_requests_by_member(
-    user: User,
     group: Group,
     other_user_group_request: GroupRequest,
     group_service: GroupService,
@@ -676,7 +657,6 @@ async def test_get_group_requests_by_member(
 
 @pytest.mark.asyncio
 async def test_get_group_requests_by_non_member(
-    user: User,
     group: Group,
     other_user_group_request: GroupRequest,
     group_service: GroupService,
@@ -1151,7 +1131,6 @@ async def test_delete_group_member_owner(
 
 @pytest.mark.asyncio
 async def test_delete_group_member_admin_by_other_admin(
-    user: User,
     group: Group,
     group_service: GroupService,
 ) -> None:
@@ -1239,7 +1218,6 @@ async def test_leave_group_by_non_member(
 
 @pytest.mark.asyncio
 async def test_get_non_private_group_member_by_non_member(
-    user: User,
     group: Group,
     other_user_group_member: GroupMember,
     group_service: GroupService,

@@ -23,8 +23,6 @@ class UpdateGroupSchema(BaseUpdateSchema):
 
 
 class CreateGroupRequestSchema(BaseModel):
-    user_id: UUID
-    group_id: UUID
     message: str | None = Field(
         default=None,
         max_length=constants.MAX_GROUP_REQUEST_MESSAGE_LENGTH,
