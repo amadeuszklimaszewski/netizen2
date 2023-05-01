@@ -1,8 +1,9 @@
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from src.constants import constants
+from src.core.enums.group import GroupRequestStatus
 from src.core.schemas.base import BaseUpdateSchema
 
 
@@ -30,8 +31,22 @@ class CreateGroupRequestSchema(BaseModel):
     )
 
 
+class UpdateGroupRequestSchema(BaseUpdateSchema):
+    status: GroupRequestStatus
+
+    @validator("status")
+    def validate_status(cls, status: GroupRequestStatus) -> GroupRequestStatus:
+        if status == GroupRequestStatus.PENDING:
+            raise ValueError("Can only update status to APPROVED or REJECTED")
+        return status
+
+
 class CreateGroupMemberSchema(BaseModel):
     user_id: UUID
     group_id: UUID
     is_admin: bool = False
     is_owner: bool = False
+
+
+class UpdateGroupMemberSchema(BaseUpdateSchema):
+    is_admin: bool

@@ -9,7 +9,7 @@ from sqlalchemy import Table
 class Filter(BaseModel):
     field: str
     operator: Callable
-    value: int | float | bool | str | UUID
+    value: UUID | int | float | bool | str
 
     def __call__(self, item):
         return self.operator(getattr(item, self.field), self.value)
