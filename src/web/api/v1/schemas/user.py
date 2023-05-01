@@ -1,11 +1,11 @@
 from datetime import date
-from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
 
+from src.web.api.v1.schemas.base import BaseOutputSchema
 
-class UserOutputSchema(BaseModel):
-    id: UUID
+
+class UserOutputSchema(BaseOutputSchema):
     email: str
     is_active: bool
 
