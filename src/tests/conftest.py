@@ -26,7 +26,13 @@ from src.tests.fakes.repositories.group import (
     FakeGroupRequestRepository,
 )
 from src.tests.fakes.repositories.user import FakeUserRepository
-from src.web.api.v1.dependencies import get_email_service, get_user_repository
+from src.web.api.v1.dependencies import (
+    get_email_service,
+    get_group_member_repository,
+    get_group_repository,
+    get_group_request_repository,
+    get_user_repository,
+)
 from src.web.application import get_app
 
 
@@ -120,10 +126,21 @@ def email_service() -> EmailService:
 def fastapi_app(
     email_service: EmailService,
     user_repository: UserRepository,
+    group_repository: GroupRepository,
+    group_member_repository: GroupMemberRepository,
+    group_request_repository: GroupRequestRepository,
 ) -> FastAPI:
     app = get_app()
     app.dependency_overrides[get_user_repository] = lambda: user_repository
     app.dependency_overrides[get_email_service] = lambda: email_service
+    app.dependency_overrides[get_group_repository] = lambda: group_repository
+    app.dependency_overrides[
+        get_group_member_repository
+    ] = lambda: group_member_repository
+    app.dependency_overrides[
+        get_group_request_repository
+    ] = lambda: group_request_repository
+
     return app  # noqa: WPS331
 
 
