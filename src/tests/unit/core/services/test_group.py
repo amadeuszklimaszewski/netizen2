@@ -190,6 +190,9 @@ async def test_delete_group(
 ) -> None:
     await group_service.delete_group(user.id, group.id)
 
+    group_members = await group_service.group_repository.get_many()
+    assert group_members == []
+
     with pytest.raises(DoesNotExistError):
         await group_service.get_group(group.id)
 

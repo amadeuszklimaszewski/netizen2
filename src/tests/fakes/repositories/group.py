@@ -175,6 +175,11 @@ class FakeGroupMemberRepository(GroupMemberRepository):
     async def delete(self, group_member: GroupMember) -> None:
         del self.group_members[group_member.id]
 
+    async def delete_by_group_id(self, group_id: UUID) -> None:
+        for member_id in list(self.group_members.keys()):
+            if self.group_members[member_id].group_id == group_id:
+                del self.group_members[member_id]
+
     async def get_by_user_and_group_id(
         self,
         user_id: UUID,

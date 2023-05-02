@@ -27,3 +27,7 @@ class GroupMemberRepository(BaseRepository[uuid.UUID, GroupMember], ABC):
         group_id: uuid.UUID,
     ) -> GroupMember:
         raise NotImplementedError
+
+    @abstractmethod
+    async def delete_by_group_id(self, group_id: uuid.UUID) -> None:
+        raise NotImplementedError

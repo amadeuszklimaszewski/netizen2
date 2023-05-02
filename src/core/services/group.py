@@ -101,6 +101,7 @@ class GroupService:
         if not member.is_owner:
             raise NotAGroupOwnerError("Not the owner of the group")
 
+        await self.member_repository.delete_by_group_id(group_id)
         await self.group_repository.delete(group)
 
     async def get_group(self, group_id: UUID) -> Group:

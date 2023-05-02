@@ -1,7 +1,7 @@
 import uuid
 from typing import Type
 
-from sqlalchemy import Table, select
+from sqlalchemy import Table, delete, select
 
 from src.core.enums.group import GroupRequestStatus
 from src.core.exceptions import DoesNotExistError
@@ -61,6 +61,10 @@ class GroupMemberRepository(
             )
 
         return self._model.from_orm(result)
+
+    async def delete_by_group_id(self, group_id: uuid.UUID) -> None:
+        stmt = delete(self._table).where(self._table.c.group_id == group_id)
+        await self._conn.execute(stmt)
 
     @property
     def _table(self) -> Table:
