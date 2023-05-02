@@ -1,7 +1,7 @@
 from uuid import UUID
 
-from src.core.models.user import User
 from src.core.models.group import Group, GroupMember, GroupRequest
+from src.core.models.user import User
 
 
 class FakeDatabase:

@@ -19,8 +19,8 @@ from src.core.services.user import UserService
 from src.infrastructure.database.metadata import metadata
 from src.infrastructure.database.tables import load_all_tables
 from src.settings import Settings
-from src.tests.fakes.email import FakeEmailService
 from src.tests.fakes.database import FakeDatabase
+from src.tests.fakes.email import FakeEmailService
 from src.tests.fakes.repositories.group import (
     FakeGroupMemberRepository,
     FakeGroupRepository,
