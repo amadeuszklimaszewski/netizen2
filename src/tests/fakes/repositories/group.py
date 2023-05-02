@@ -107,6 +107,11 @@ class FakeGroupRequestRepository(GroupRequestRepository):
     async def delete(self, group_request: GroupRequest) -> None:
         del self.group_requests[group_request.id]
 
+    async def delete_by_group_id(self, group_id: UUID) -> None:
+        for request_id in list(self.group_requests.keys()):
+            if self.group_requests[request_id].group_id == group_id:
+                del self.group_requests[request_id]
+
     async def get_pending_request_by_user_and_group_id(
         self,
         user_id: UUID,

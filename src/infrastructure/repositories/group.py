@@ -102,6 +102,10 @@ class GroupRequestRepository(
 
         return self._model.from_orm(result)
 
+    async def delete_by_group_id(self, group_id: uuid.UUID) -> None:
+        stmt = delete(self._table).where(self._table.c.group_id == group_id)
+        await self._conn.execute(stmt)
+
     @property
     def _table(self) -> Table:
         return group_request_table

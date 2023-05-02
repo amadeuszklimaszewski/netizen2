@@ -18,6 +18,10 @@ class GroupRequestRepository(BaseRepository[uuid.UUID, GroupRequest], ABC):
     ) -> GroupRequest:
         raise NotImplementedError
 
+    @abstractmethod
+    async def delete_by_group_id(self, group_id: uuid.UUID) -> None:
+        raise NotImplementedError
+
 
 class GroupMemberRepository(BaseRepository[uuid.UUID, GroupMember], ABC):
     @abstractmethod
