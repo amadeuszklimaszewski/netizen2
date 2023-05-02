@@ -6,9 +6,17 @@ import pytest_asyncio
 
 from src.core.enums.group import GroupRequestStatus
 from src.core.exceptions import (
-    AlreadyExistsError,
+    AlreadyAGroupMemberError,
+    AlreadyAGroupOwnerError,
+    AlreadyRequestedToJoinGroupError,
+    CannotDeleteAGroupOwnerError,
+    CannotLeaveGroupAsOwnerError,
     DoesNotExistError,
-    PermissionDeniedError,
+    NotAGroupMemberError,
+    NotAGroupOwnerError,
+    NotAGroupOwnerOrAdminError,
+    NotARequestOwnerError,
+    RequestNotPendingError,
 )
 from src.core.filters.group import GroupInputFilters
 from src.core.models.group import Group, GroupMember, GroupRequest
@@ -157,7 +165,7 @@ async def test_update_group_other_user(
     update_group_schema: UpdateGroupSchema,
     group_service: GroupService,
 ) -> None:
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupMemberError):
         await group_service.update_group(other_user.id, group.id, update_group_schema)
 
 
@@ -170,7 +178,7 @@ async def test_update_group_other_member(
     update_group_schema: UpdateGroupSchema,
     group_service: GroupService,
 ) -> None:
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupOwnerError):
         await group_service.update_group(other_user.id, group.id, update_group_schema)
 
 
@@ -192,7 +200,7 @@ async def test_delete_group_other_user(
     group: Group,
     group_service: GroupService,
 ) -> None:
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupMemberError):
         await group_service.delete_group(other_user.id, group.id)
 
 
@@ -203,7 +211,7 @@ async def test_delete_group_other_member(
     other_user_group_member: GroupMember,
     group_service: GroupService,
 ) -> None:
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupOwnerError):
         await group_service.delete_group(other_user.id, group.id)
 
 
@@ -215,7 +223,7 @@ async def test_delete_group_other_member_is_admin(
     group_service: GroupService,
 ) -> None:
     other_user_group_member.is_admin = True
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupOwnerError):
         await group_service.delete_group(other_user.id, group.id)
 
 
@@ -282,7 +290,7 @@ async def test_create_group_request_already_member(
 ) -> None:
     schema = CreateGroupRequestSchema(message="Test message")
 
-    with pytest.raises(AlreadyExistsError):
+    with pytest.raises(AlreadyAGroupMemberError):
         await group_service.create_group_request(user.id, group.id, schema)
 
 
@@ -296,7 +304,7 @@ async def test_create_group_request_already_requested(
 
     await group_service.create_group_request(other_user.id, group.id, schema)
 
-    with pytest.raises(AlreadyExistsError):
+    with pytest.raises(AlreadyRequestedToJoinGroupError):
         await group_service.create_group_request(other_user.id, group.id, schema)
 
 
@@ -407,7 +415,7 @@ async def test_update_group_request_not_admin_or_owner(
         status=GroupRequestStatus.ACCEPTED,
     )
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupOwnerOrAdminError):
         await group_service.update_group_request(
             request_user.id,
             group.id,
@@ -434,7 +442,7 @@ async def test_update_group_request_not_pending(
         update_schema,
     )
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(RequestNotPendingError):
         await group_service.update_group_request(
             user.id,
             group.id,
@@ -506,6 +514,21 @@ async def test_delete_group_request(
     with pytest.raises(DoesNotExistError):
         await group_service.get_group_request(
             other_user.id,
+            group.id,
+            other_user_group_request.id,
+        )
+
+
+@pytest.mark.asyncio
+async def test_delete_group_request_by_non_owner(
+    other_user: User,
+    group: Group,
+    other_user_group_request: GroupRequest,
+    group_service: GroupService,
+) -> None:
+    with pytest.raises(DoesNotExistError):
+        await group_service.delete_group_request(
+            uuid4(),
             group.id,
             other_user_group_request.id,
         )
@@ -587,7 +610,7 @@ async def test_delete_group_request_not_pending(
         update_schema,
     )
 
-    with pytest.raises(DoesNotExistError):
+    with pytest.raises(RequestNotPendingError):
         await group_service.delete_group_request(
             other_user_group_request.user_id,
             group.id,
@@ -651,7 +674,7 @@ async def test_get_group_requests_by_member(
     )
     await group_service.create_group_member(create_member_schema)
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupOwnerOrAdminError):
         await group_service.get_group_requests(request_user.id, group.id)
 
 
@@ -704,7 +727,7 @@ async def test_create_group_member_already_member(
         group_id=group.id,
     )
 
-    with pytest.raises(AlreadyExistsError):
+    with pytest.raises(AlreadyAGroupMemberError):
         await group_service.create_group_member(schema)
 
 
@@ -808,7 +831,7 @@ async def test_update_group_member_by_non_admin_member(
         is_admin=True,
     )
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupOwnerError):
         await group_service.update_group_member(
             request_user.id,
             group.id,
@@ -834,7 +857,7 @@ async def test_update_group_member_by_non_member(
         is_admin=True,
     )
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupMemberError):
         await group_service.update_group_member(
             request_user.id,
             group.id,
@@ -857,7 +880,7 @@ async def test_update_group_member_owner(
         is_admin=True,
     )
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupOwnerError):
         await group_service.update_group_member(
             other_user_group_member.user_id,
             group.id,
@@ -890,7 +913,7 @@ async def test_update_admin_group_member_by_admin_member(
         is_admin=True,
     )
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupOwnerError):
         await group_service.update_group_member(
             request_user.id,
             group.id,
@@ -970,7 +993,7 @@ async def test_change_group_owner_by_non_admin_member(
     )
     await group_service.create_group_member(create_member_schema)
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupOwnerError):
         await group_service.change_group_owner(
             request_user.id,
             group.id,
@@ -991,7 +1014,7 @@ async def test_change_group_owner_by_non_member(
         date_of_birth=date(1990, 1, 1),
     )
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupMemberError):
         await group_service.change_group_owner(
             request_user.id,
             group.id,
@@ -1008,7 +1031,7 @@ async def test_change_group_owner_to_existing_owner(
     members = await group_service.get_group_members(user.id, group.id)
     owner = next(member for member in members if member.is_owner)
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(AlreadyAGroupOwnerError):
         await group_service.change_group_owner(
             user.id,
             group.id,
@@ -1083,7 +1106,7 @@ async def test_delete_group_member_by_non_admin_member(
     )
     await group_service.create_group_member(create_member_schema)
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupOwnerOrAdminError):
         await group_service.delete_group_member(
             request_user.id,
             group.id,
@@ -1104,7 +1127,7 @@ async def test_delete_group_member_by_non_member(
         date_of_birth=date(1990, 1, 1),
     )
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupMemberError):
         await group_service.delete_group_member(
             request_user.id,
             group.id,
@@ -1121,7 +1144,7 @@ async def test_delete_group_member_owner(
     members = await group_service.get_group_members(user.id, group.id)
     owner = next(member for member in members if member.is_owner)
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(CannotDeleteAGroupOwnerError):
         await group_service.delete_group_member(
             user.id,
             group.id,
@@ -1161,7 +1184,7 @@ async def test_delete_group_member_admin_by_other_admin(
     admin = await group_service.create_group_member(admin_member_schema)
     other_admin = await group_service.create_group_member(other_admin_member_schema)
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupOwnerError):
         await group_service.delete_group_member(
             admin.user_id,
             group.id,
@@ -1175,7 +1198,7 @@ async def test_leave_group_by_owner(
     group: Group,
     group_service: GroupService,
 ) -> None:
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(CannotLeaveGroupAsOwnerError):
         await group_service.leave_group(
             request_user_id=user.id,
             group_id=group.id,
@@ -1242,7 +1265,7 @@ async def test_get_private_group_member_by_non_member(
     group_schema = UpdateGroupSchema(is_private=True)  # type: ignore
     await group_service.update_group(user.id, group.id, group_schema)
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupMemberError):
         await group_service.get_group_member(
             request_user_id=uuid4(),
             group_id=group.id,
@@ -1356,7 +1379,7 @@ async def test_get_group_members_by_non_member_private_group(
     group_schema = UpdateGroupSchema(is_private=True)  # type: ignore
     await group_service.update_group(user.id, group.id, group_schema)
 
-    with pytest.raises(PermissionDeniedError):
+    with pytest.raises(NotAGroupMemberError):
         await group_service.get_group_members(
             request_user_id=uuid4(),
             group_id=group.id,

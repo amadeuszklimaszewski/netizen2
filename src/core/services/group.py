@@ -2,9 +2,17 @@ from uuid import UUID
 
 from src.core.enums.group import GroupRequestStatus
 from src.core.exceptions import (
-    AlreadyExistsError,
+    AlreadyAGroupMemberError,
+    AlreadyAGroupOwnerError,
+    AlreadyRequestedToJoinGroupError,
+    CannotDeleteAGroupOwnerError,
+    CannotLeaveGroupAsOwnerError,
     DoesNotExistError,
-    PermissionDeniedError,
+    NotAGroupMemberError,
+    NotAGroupOwnerError,
+    NotAGroupOwnerOrAdminError,
+    NotARequestOwnerError,
+    RequestNotPendingError,
 )
 from src.core.filters.group import (
     GroupFilterSet,
@@ -67,10 +75,10 @@ class GroupService:
                 group_id=group_id,
             )
         except DoesNotExistError:
-            raise PermissionDeniedError("Only group members can update group")
+            raise NotAGroupMemberError("Not a member of the group")
 
         if not member.is_owner:
-            raise PermissionDeniedError("Only group owner can update group")
+            raise NotAGroupOwnerError("Not the owner of the group")
 
         fields_to_update = []
         for key, value in schema.dict().items():
@@ -88,10 +96,10 @@ class GroupService:
                 group_id=group_id,
             )
         except DoesNotExistError:
-            raise PermissionDeniedError("Is not a member of the group")
+            raise NotAGroupMemberError("Not a member of the group")
 
         if not member.is_owner:
-            raise PermissionDeniedError("Only the owner can delete a group")
+            raise NotAGroupOwnerError("Not the owner of the group")
 
         await self.group_repository.delete(group)
 
@@ -119,7 +127,9 @@ class GroupService:
                 user_id=user_id,
                 group_id=group_id,
             )
-            raise AlreadyExistsError("Already requested to join the group")
+            raise AlreadyRequestedToJoinGroupError(
+                "Already requested to join the group",
+            )
         except DoesNotExistError:
             pass
 
@@ -128,7 +138,7 @@ class GroupService:
                 user_id=user_id,
                 group_id=group_id,
             )
-            raise AlreadyExistsError("Already a member of the group")
+            raise AlreadyAGroupMemberError("Already a member of the group")
         except DoesNotExistError:
             pass
 
@@ -157,10 +167,12 @@ class GroupService:
         )
 
         if not (member.is_owner or member.is_admin):
-            raise PermissionDeniedError("Only group owner or admin can update requests")
+            raise NotAGroupOwnerOrAdminError(
+                "Only group owner or admin can update requests",
+            )
 
         if group_request.status != GroupRequestStatus.PENDING:
-            raise PermissionDeniedError("Request is no longer pending")
+            raise RequestNotPendingError("Request is no longer pending")
 
         group_request.status = schema.status
         await self.request_repository.update(group_request, ["status"])
@@ -189,7 +201,7 @@ class GroupService:
             raise DoesNotExistError("Invalid request id")
 
         if group_request.status != GroupRequestStatus.PENDING:
-            raise DoesNotExistError("Request is no longer pending")
+            raise RequestNotPendingError("Request is no longer pending")
 
         await self.request_repository.delete(group_request)
 
@@ -202,7 +214,7 @@ class GroupService:
         group_request = await self.request_repository.get(pk=request_id)
 
         if group_request.group_id != group_id:
-            raise PermissionDeniedError("Invalid request id")
+            raise DoesNotExistError("Invalid request id")
 
         try:
             member = await self.member_repository.get_by_user_and_group_id(
@@ -210,10 +222,10 @@ class GroupService:
                 group_id=group_id,
             )
             if not (member.is_admin or member.is_owner):
-                raise PermissionDeniedError("Not an admin or owner of the group")
+                raise NotAGroupOwnerOrAdminError("Not an admin or owner of the group")
         except DoesNotExistError:
             if group_request.user_id != request_user_id:
-                raise PermissionDeniedError("Only the request owner can view it")
+                raise NotARequestOwnerError("Only the request owner can view it")
 
         return group_request
 
@@ -238,7 +250,7 @@ class GroupService:
                 group_id=group_id,
             )
             if not (member.is_admin or member.is_owner):
-                raise PermissionDeniedError("Not an admin or owner of the group")
+                raise NotAGroupOwnerOrAdminError("Not an admin or owner of the group")
 
         except DoesNotExistError:
             filter_set.user_id__eq = request_user_id
@@ -256,7 +268,7 @@ class GroupService:
                 user_id=schema.user_id,
                 group_id=schema.group_id,
             )
-            raise AlreadyExistsError("Already a member of the group")
+            raise AlreadyAGroupMemberError("Already a member of the group")
         except DoesNotExistError:
             pass
 
@@ -279,10 +291,10 @@ class GroupService:
                 group_id=group_id,
             )
         except DoesNotExistError:
-            raise PermissionDeniedError("Not a member of the group")
+            raise NotAGroupMemberError("Not a member of the group")
 
         if not member.is_owner:
-            raise PermissionDeniedError("Only a group owner can update a member")
+            raise NotAGroupOwnerError("Only a group owner can update a member")
 
         member_to_update = await self.member_repository.get(pk=member_id)
 
@@ -306,15 +318,15 @@ class GroupService:
                 group_id=group_id,
             )
         except DoesNotExistError:
-            raise PermissionDeniedError("Not a member of the group")
+            raise NotAGroupMemberError("Not a member of the group")
 
         member_to_update = await self.member_repository.get(pk=member_id)
 
         if not member.is_owner:
-            raise PermissionDeniedError("Only the owner can change the owner")
+            raise NotAGroupOwnerError("Only the owner can change the owner")
 
         if member_to_update.user_id == request_user_id:
-            raise PermissionDeniedError("Cannot change yourself to owner")
+            raise AlreadyAGroupOwnerError("Already the owner of the group")
 
         member.is_owner = False
         member_to_update.is_owner = True
@@ -336,18 +348,20 @@ class GroupService:
                 group_id=group_id,
             )
         except DoesNotExistError:
-            raise PermissionDeniedError("Not a member of the group")
+            raise NotAGroupMemberError("Not a member of the group")
 
         if not (member.is_admin or member.is_owner):
-            raise PermissionDeniedError("Only an admin or owner can delete a member")
+            raise NotAGroupOwnerOrAdminError(
+                "Only an admin or owner can delete a member",
+            )
 
         member_to_delete = await self.member_repository.get(pk=member_id)
 
         if member_to_delete.is_owner:
-            raise PermissionDeniedError("Cannot delete a group owner")
+            raise CannotDeleteAGroupOwnerError("Cannot delete a group owner")
 
         if member_to_delete.is_admin and not member.is_owner:
-            raise PermissionDeniedError("Only the owner can delete a group admin")
+            raise NotAGroupOwnerError("Only the owner can delete a group admin")
 
         await self.member_repository.delete(member_to_delete)
 
@@ -362,7 +376,7 @@ class GroupService:
         )
 
         if member.is_owner:
-            raise PermissionDeniedError("Cannot leave as owner")
+            raise CannotLeaveGroupAsOwnerError("Cannot leave as owner")
 
         await self.member_repository.delete(member)
 
@@ -381,7 +395,7 @@ class GroupService:
             )
         except DoesNotExistError:
             if group.is_private:
-                raise PermissionDeniedError("Not a member of the group")
+                raise NotAGroupMemberError("Not a member of the group")
 
         member = await self.member_repository.get(pk=member_id)
         if member.group_id != group_id:
@@ -413,6 +427,6 @@ class GroupService:
             )
         except DoesNotExistError:
             if group.is_private:
-                raise PermissionDeniedError("Not a member of the group")
+                raise NotAGroupMemberError("Not a member of the group")
 
         return await self.member_repository.get_many(filter_set)
