@@ -6,7 +6,9 @@ from src.core.models.group import Group, GroupMember, GroupRequest
 
 
 class GroupRepository(BaseRepository[uuid.UUID, Group], ABC):
-    pass
+    @abstractmethod
+    async def get_groups_for_user(self, user_id: uuid.UUID) -> list[Group]:
+        raise NotImplementedError
 
 
 class GroupRequestRepository(BaseRepository[uuid.UUID, GroupRequest], ABC):

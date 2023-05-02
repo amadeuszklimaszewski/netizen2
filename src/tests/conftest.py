@@ -20,6 +20,7 @@ from src.infrastructure.database.metadata import metadata
 from src.infrastructure.database.tables import load_all_tables
 from src.settings import Settings
 from src.tests.fakes.email import FakeEmailService
+from src.tests.fakes.database import FakeDatabase
 from src.tests.fakes.repositories.group import (
     FakeGroupMemberRepository,
     FakeGroupRepository,
@@ -70,8 +71,13 @@ async def async_db_connection(
 
 
 @pytest.fixture
-def user_repository() -> UserRepository:
-    return FakeUserRepository()
+def fake_db() -> FakeDatabase:
+    return FakeDatabase()
+
+
+@pytest.fixture
+def user_repository(fake_db: FakeDatabase) -> UserRepository:
+    return FakeUserRepository(fake_db)
 
 
 @pytest.fixture
@@ -90,18 +96,18 @@ def auth_service(
 
 
 @pytest.fixture
-def group_repository() -> GroupRepository:
-    return FakeGroupRepository()
+def group_repository(fake_db: FakeDatabase) -> GroupRepository:
+    return FakeGroupRepository(fake_db)
 
 
 @pytest.fixture
-def group_member_repository() -> GroupMemberRepository:
-    return FakeGroupMemberRepository()
+def group_member_repository(fake_db: FakeDatabase) -> GroupMemberRepository:
+    return FakeGroupMemberRepository(fake_db)
 
 
 @pytest.fixture
-def group_request_repository() -> GroupRequestRepository:
-    return FakeGroupRequestRepository()
+def group_request_repository(fake_db: FakeDatabase) -> GroupRequestRepository:
+    return FakeGroupRequestRepository(fake_db)
 
 
 @pytest.fixture
