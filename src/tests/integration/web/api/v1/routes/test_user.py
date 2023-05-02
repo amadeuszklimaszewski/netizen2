@@ -144,7 +144,7 @@ async def test_update_user(
     user_bearer_token_header: dict[str, str],
 ):
     update_user_data = {"first_name": "New Name", "last_name": "New Last Name"}
-    response: Response = await client.put(
+    response: Response = await client.patch(
         f"/users/{user.id}/",
         json=update_user_data,
         headers=user_bearer_token_header,
@@ -164,7 +164,7 @@ async def test_update_user_other_user(
     user_bearer_token_header: dict[str, str],
 ):
     update_user_data = {"first_name": "New Name", "last_name": "New Last Name"}
-    response: Response = await client.put(
+    response: Response = await client.patch(
         f"/users/{other_user.id}/",
         json=update_user_data,
         headers=user_bearer_token_header,

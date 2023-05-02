@@ -93,7 +93,7 @@ async def test_update_group(
     group: Group,
     update_group_schema: UpdateGroupSchema,
 ) -> None:
-    response: Response = await client.put(
+    response: Response = await client.patch(
         f"/groups/{group.id}/",
         headers=user_bearer_token_header,
         json=update_group_schema.dict(),
@@ -161,7 +161,7 @@ async def test_update_group_member(
     other_user_group_member: GroupMember,
 ) -> None:
     schema = UpdateGroupMemberSchema(is_admin=True)
-    response: Response = await client.put(
+    response: Response = await client.patch(
         f"/groups/{group.id}/members/{other_user_group_member.id}/",
         headers=user_bearer_token_header,
         json=schema.dict(),
@@ -258,7 +258,7 @@ async def test_update_group_request(
     schema = UpdateGroupRequestSchema(
         status=GroupRequestStatus.ACCEPTED,
     )
-    response: Response = await client.put(
+    response: Response = await client.patch(
         f"/groups/{group.id}/requests/{other_user_group_request.id}/",
         headers=user_bearer_token_header,
         json=schema.dict(),

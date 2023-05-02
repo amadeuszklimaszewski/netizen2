@@ -78,7 +78,7 @@ async def get_group(
     return await group_service.get_group(group_id)
 
 
-@group_router.put(
+@group_router.patch(
     "/{group_id}/",
     tags=["groups"],
     status_code=status.HTTP_200_OK,
@@ -149,7 +149,7 @@ async def get_group_member(
     return await group_service.get_group_member(user.id, group_id, member_id)
 
 
-@group_router.put(
+@group_router.patch(
     "/{group_id}/members/{member_id}/",
     tags=["groups"],
     status_code=status.HTTP_200_OK,
@@ -240,7 +240,7 @@ async def get_group_request(
     return await group_service.get_group_request(user.id, group_id, request_id)
 
 
-@group_router.put(
+@group_router.patch(
     "/{group_id}/requests/{request_id}/",
     tags=["groups"],
     status_code=status.HTTP_200_OK,

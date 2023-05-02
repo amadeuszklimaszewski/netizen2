@@ -100,7 +100,7 @@ async def get_user(
     return await user_service.get_user(user_id)
 
 
-@user_router.put(
+@user_router.patch(
     "/{user_id}/",
     tags=["users"],
     status_code=status.HTTP_200_OK,
