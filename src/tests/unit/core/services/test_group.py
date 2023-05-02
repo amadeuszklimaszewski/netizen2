@@ -619,6 +619,52 @@ async def test_delete_group_request_not_pending(
 
 
 @pytest.mark.asyncio
+async def test_get_group_request(
+    user: User,
+    group: Group,
+    other_user_group_request: GroupRequest,
+    group_service: GroupService,
+) -> None:
+    request = await group_service.get_group_request(
+        user.id,
+        group.id,
+        other_user_group_request.id,
+    )
+
+    assert request.id == other_user_group_request.id
+
+
+@pytest.mark.asyncio
+async def test_get_group_request_wrong_group_id(
+    user: User,
+    group: Group,
+    other_user_group_request: GroupRequest,
+    group_service: GroupService,
+) -> None:
+    with pytest.raises(DoesNotExistError):
+        await group_service.get_group_request(
+            user.id,
+            uuid4(),
+            other_user_group_request.id,
+        )
+
+
+@pytest.mark.asyncio
+async def test_get_group_request_by_not_request_owner(
+    user: User,
+    group: Group,
+    other_user_group_request: GroupRequest,
+    group_service: GroupService,
+) -> None:
+    with pytest.raises(NotARequestOwnerError):
+        await group_service.get_group_request(
+            uuid4(),
+            group.id,
+            other_user_group_request.id,
+        )
+
+
+@pytest.mark.asyncio
 async def test_get_group_requests_by_admin_or_owner(
     user: User,
     group: Group,
