@@ -5,6 +5,14 @@ import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, create_async_engine
+from tests.fakes.database import FakeDatabase
+from tests.fakes.email import FakeEmailService
+from tests.fakes.repositories.group import (
+    FakeGroupMemberRepository,
+    FakeGroupRepository,
+    FakeGroupRequestRepository,
+)
+from tests.fakes.repositories.user import FakeUserRepository
 
 from src.core.interfaces.email import EmailService
 from src.core.interfaces.repositories.group import (
@@ -19,14 +27,6 @@ from src.core.services.user import UserService
 from src.infrastructure.database.metadata import metadata
 from src.infrastructure.database.tables import load_all_tables
 from src.settings import Settings
-from src.tests.fakes.database import FakeDatabase
-from src.tests.fakes.email import FakeEmailService
-from src.tests.fakes.repositories.group import (
-    FakeGroupMemberRepository,
-    FakeGroupRepository,
-    FakeGroupRequestRepository,
-)
-from src.tests.fakes.repositories.user import FakeUserRepository
 from src.web.api.v1.dependencies import (
     get_email_service,
     get_group_member_repository,

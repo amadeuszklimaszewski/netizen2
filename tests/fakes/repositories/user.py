@@ -1,10 +1,11 @@
 from uuid import UUID
 
+from tests.fakes.database import FakeDatabase
+
 from src.core.exceptions import AlreadyExistsError, DoesNotExistError
 from src.core.filters.base import FilterSet
 from src.core.interfaces.repositories.user import UserRepository
 from src.core.models.user import User
-from src.tests.fakes.database import FakeDatabase
 
 
 class FakeUserRepository(UserRepository):

@@ -1,5 +1,7 @@
 from uuid import UUID
 
+from tests.fakes.database import FakeDatabase
+
 from src.core.enums.group import GroupRequestStatus
 from src.core.exceptions import AlreadyExistsError, DoesNotExistError
 from src.core.filters.group import FilterSet
@@ -9,7 +11,6 @@ from src.core.interfaces.repositories.group import (
     GroupRequestRepository,
 )
 from src.core.models.group import Group, GroupMember, GroupRequest
-from src.tests.fakes.database import FakeDatabase
 
 
 class FakeGroupRepository(GroupRepository):
