@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
 from src.core.exceptions import (
+    ApplicationError,
     DoesNotExistError,
     ExpiredAccessTokenError,
     InvalidAccessTokenError,
@@ -55,16 +56,6 @@ def get_app() -> FastAPI:
             content={"detail": "Token expired"},
         )
 
-    @app.exception_handler(DoesNotExistError)
-    async def does_not_exist_exception_handler(
-        request: Request,
-        exc: DoesNotExistError,
-    ):
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"detail": "Not found"},
-        )
-
     @app.exception_handler(PermissionDeniedError)
     async def permission_denied_exception_handler(
         request: Request,
@@ -73,6 +64,26 @@ def get_app() -> FastAPI:
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN,
             content={"detail": "Permission denied"},
+        )
+
+    @app.exception_handler(ApplicationError)
+    async def application_error_handler(
+        request: Request,
+        exc: ApplicationError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": str(exc)},
+        )
+
+    @app.exception_handler(DoesNotExistError)
+    async def does_not_exist_exception_handler(
+        request: Request,
+        exc: DoesNotExistError,
+    ):
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": "Not found"},
         )
 
     app.include_router(router=api_router, prefix="/api")
