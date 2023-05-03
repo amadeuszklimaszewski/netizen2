@@ -120,6 +120,37 @@ async def test_delete_group(
 
 
 @pytest.mark.asyncio
+async def test_get_groups_for_user(
+    client: AsyncClient,
+    user_bearer_token_header: dict[str, str],
+    group: Group,
+) -> None:
+    response: Response = await client.get(
+        "/groups/user/",
+        headers=user_bearer_token_header,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 1
+
+
+@pytest.mark.asyncio
+async def test_get_group_requests_for_user(
+    client: AsyncClient,
+    group: Group,
+    other_user_bearer_token_header: dict[str, str],
+    other_user_group_request: GroupRequest,
+) -> None:
+    response: Response = await client.get(
+        "/groups/user/requests/",
+        headers=other_user_bearer_token_header,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 1
+
+
+@pytest.mark.asyncio
 async def test_get_groups(
     client: AsyncClient,
     user_bearer_token_header: dict[str, str],
@@ -285,7 +316,7 @@ async def test_delete_group_request(
 
 
 @pytest.mark.asyncio
-async def test_get_group_requests(
+async def test_get_group_requests_for_group(
     client: AsyncClient,
     user: User,
     other_user_group_request: GroupRequest,

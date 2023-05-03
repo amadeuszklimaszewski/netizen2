@@ -27,11 +27,11 @@ class GroupRepository(
     SQLAlchemyRepository[uuid.UUID, Group],
     AbstractGroupRepository,
 ):
-    async def get_groups_for_user(self, user_id: uuid.UUID) -> list[Group]:
+    async def get_many_for_user(self, user_id: uuid.UUID) -> list[Group]:
         stmt = (
             select(self._table)
-            .join(group_member_table)
-            .where(group_member_table.c.user_id == user_id)
+            .join(self._group_member_table)
+            .where(self._group_member_table.c.user_id == user_id)
         )
         results = await self._conn.execute(stmt)
         return [self._model.from_orm(result) for result in results]

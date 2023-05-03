@@ -20,7 +20,6 @@ from src.core.filters.group import (
     GroupMemberFilterSet,
     GroupMemberInputFilters,
     GroupRequestFilterSet,
-    GroupRequestInputFilters,
 )
 from src.core.interfaces.repositories.group import (
     GroupMemberRepository,
@@ -117,6 +116,14 @@ class GroupService:
 
         filter_set = GroupFilterSet(**input_filters.dict())
         return await self.group_repository.get_many(filter_set)
+
+    async def get_groups_for_user(
+        self,
+        user_id: UUID,
+    ) -> list[Group]:
+        return await self.group_repository.get_many_for_user(
+            user_id=user_id,
+        )
 
     async def create_group_request(
         self,
@@ -231,19 +238,15 @@ class GroupService:
 
         return group_request
 
-    async def get_group_requests(
+    async def get_group_requests_for_group(
         self,
         request_user_id: UUID,
         group_id: UUID,
-        input_filters: GroupRequestInputFilters | None = None,
     ) -> list[GroupRequest]:
-        if input_filters is None:
-            input_filters = GroupRequestInputFilters()
-
         filter_set = GroupRequestFilterSet(
             group_id__eq=group_id,
             user_id__eq=None,
-            **input_filters.dict(),
+            status__eq=GroupRequestStatus.PENDING,
         )
 
         try:
@@ -256,6 +259,18 @@ class GroupService:
 
         except DoesNotExistError:
             filter_set.user_id__eq = request_user_id
+
+        return await self.request_repository.get_many(filter_set)
+
+    async def get_group_requests_for_user(
+        self,
+        user_id: UUID,
+    ) -> list[GroupRequest]:
+        filter_set = GroupRequestFilterSet(
+            group_id__eq=None,
+            user_id__eq=user_id,
+            status__eq=GroupRequestStatus.PENDING,
+        )
 
         return await self.request_repository.get_many(filter_set)
 

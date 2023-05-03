@@ -234,6 +234,18 @@ async def test_delete_group_other_member_is_admin(
 
 
 @pytest.mark.asyncio
+async def test_get_groups_for_user(
+    user: User,
+    group: Group,
+    group_service: GroupService,
+) -> None:
+    result = await group_service.get_groups_for_user(user.id)
+
+    assert len(result) == 1
+    assert result[0] == group
+
+
+@pytest.mark.asyncio
 async def test_get_group(
     group: Group,
     group_service: GroupService,
@@ -625,6 +637,24 @@ async def test_delete_group_request_not_pending(
 
 
 @pytest.mark.asyncio
+async def test_get_group_requests_for_user(
+    other_user: User,
+    group: Group,
+    other_user_group_request: GroupRequest,
+    group_service: GroupService,
+) -> None:
+    requests = await group_service.get_group_requests_for_user(
+        other_user.id,
+    )
+
+    assert len(requests) == 1
+    assert requests[0].id == other_user_group_request.id
+    assert requests[0].user_id == other_user.id
+    assert requests[0].group_id == group.id
+    assert requests[0].status == GroupRequestStatus.PENDING
+
+
+@pytest.mark.asyncio
 async def test_get_group_request(
     user: User,
     group: Group,
@@ -671,45 +701,45 @@ async def test_get_group_request_by_not_request_owner(
 
 
 @pytest.mark.asyncio
-async def test_get_group_requests_by_admin_or_owner(
+async def test_get_group_requests_for_group_by_admin_or_owner(
     user: User,
     group: Group,
     other_user_group_request: GroupRequest,
     group_service: GroupService,
 ) -> None:
-    requests = await group_service.get_group_requests(user.id, group.id)
+    requests = await group_service.get_group_requests_for_group(user.id, group.id)
 
     assert len(requests) == 1
     assert requests[0].id == other_user_group_request.id
 
 
 @pytest.mark.asyncio
-async def test_get_group_requests_wrong_group_id(
+async def test_get_group_requests_for_group_wrong_group_id(
     user: User,
     group: Group,
     other_user_group_request: GroupRequest,
     group_service: GroupService,
 ) -> None:
-    requests = await group_service.get_group_requests(user.id, uuid4())
+    requests = await group_service.get_group_requests_for_group(user.id, uuid4())
 
     assert requests == []
 
 
 @pytest.mark.asyncio
-async def test_get_group_requests_by_requesting_user(
+async def test_get_group_requests_for_group_by_requesting_user(
     other_user: User,
     group: Group,
     other_user_group_request: GroupRequest,
     group_service: GroupService,
 ) -> None:
-    requests = await group_service.get_group_requests(other_user.id, group.id)
+    requests = await group_service.get_group_requests_for_group(other_user.id, group.id)
 
     assert len(requests) == 1
     assert requests[0].id == other_user_group_request.id
 
 
 @pytest.mark.asyncio
-async def test_get_group_requests_by_member(
+async def test_get_group_requests_for_group_by_member(
     group: Group,
     other_user_group_request: GroupRequest,
     group_service: GroupService,
@@ -727,11 +757,11 @@ async def test_get_group_requests_by_member(
     await group_service.create_group_member(create_member_schema)
 
     with pytest.raises(NotAGroupOwnerOrAdminError):
-        await group_service.get_group_requests(request_user.id, group.id)
+        await group_service.get_group_requests_for_group(request_user.id, group.id)
 
 
 @pytest.mark.asyncio
-async def test_get_group_requests_by_non_member(
+async def test_get_group_requests_for_group_by_non_member(
     group: Group,
     other_user_group_request: GroupRequest,
     group_service: GroupService,
@@ -743,7 +773,10 @@ async def test_get_group_requests_by_non_member(
         date_of_birth=date(1990, 1, 1),
     )
 
-    results = await group_service.get_group_requests(request_user.id, group.id)
+    results = await group_service.get_group_requests_for_group(
+        request_user.id,
+        group.id,
+    )
 
     assert results == []
 

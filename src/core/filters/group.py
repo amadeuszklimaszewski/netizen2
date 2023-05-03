@@ -32,7 +32,3 @@ class GroupInputFilters(BaseModel):
 class GroupMemberInputFilters(BaseModel):
     is_admin__eq: bool | None = None
     is_owner__eq: bool | None = None
-
-
-class GroupRequestInputFilters(BaseModel):
-    status__eq: GroupRequestStatus | None = None

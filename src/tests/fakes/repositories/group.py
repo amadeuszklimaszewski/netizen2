@@ -33,7 +33,7 @@ class FakeGroupRepository(GroupRepository):
 
         return groups
 
-    async def get_groups_for_user(self, user_id: UUID) -> list[Group]:
+    async def get_many_for_user(self, user_id: UUID) -> list[Group]:
         memberships = [
             member
             for member in self.db.group_members.values()

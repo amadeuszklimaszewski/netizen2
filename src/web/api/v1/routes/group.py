@@ -4,11 +4,7 @@ from uuid import UUID
 from fastapi import Depends, status
 from fastapi.routing import APIRouter
 
-from src.core.filters.group import (
-    GroupInputFilters,
-    GroupMemberInputFilters,
-    GroupRequestInputFilters,
-)
+from src.core.filters.group import GroupInputFilters, GroupMemberInputFilters
 from src.core.schemas.group import (
     CreateGroupRequestSchema,
     CreateGroupSchema,
@@ -59,6 +55,38 @@ async def create_group(
     user = await auth_service.verify_access_token(access_token)
 
     return await group_service.create_group(user.id, schema)
+
+
+@group_router.get(
+    "/user/",
+    tags=["groups"],
+    status_code=status.HTTP_200_OK,
+    response_model=list[GroupOutputSchema],
+)
+async def get_groups_for_user(
+    access_token: AccessToken,
+    group_service: GroupService,
+    auth_service: AuthService,
+):
+    user = await auth_service.verify_access_token(access_token)
+
+    return await group_service.get_groups_for_user(user.id)
+
+
+@group_router.get(
+    "/user/requests/",
+    tags=["groups"],
+    status_code=status.HTTP_200_OK,
+    response_model=list[GroupRequestOutputSchema],
+)
+async def get_user_group_requests(
+    access_token: AccessToken,
+    group_service: GroupService,
+    auth_service: AuthService,
+):
+    user = await auth_service.verify_access_token(access_token)
+
+    return await group_service.get_group_requests_for_user(user.id)
 
 
 @group_router.get(
@@ -192,16 +220,15 @@ async def delete_group_member(
     status_code=status.HTTP_200_OK,
     response_model=list[GroupRequestOutputSchema],
 )
-async def get_group_requests(
+async def get_group_requests_for_group(
     group_id: UUID,
     access_token: AccessToken,
     group_service: GroupService,
     auth_service: AuthService,
-    filters: Annotated[GroupRequestInputFilters, Depends()],
 ):
     user = await auth_service.verify_access_token(access_token)
 
-    return await group_service.get_group_requests(user.id, group_id, filters)
+    return await group_service.get_group_requests_for_group(user.id, group_id)
 
 
 @group_router.post(
