@@ -10,6 +10,13 @@ up-dev:
 	docker compose run --rm web bash -c "alembic upgrade head"
 	docker compose up
 
+build-prod:
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml build
+
+up-prod:
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm web bash -c "alembic upgrade head"
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
 makemigrations:
 	docker compose run --rm web bash -c "alembic revision --autogenerate"
 
