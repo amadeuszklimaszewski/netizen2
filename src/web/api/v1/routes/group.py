@@ -79,7 +79,7 @@ async def get_groups_for_user(
     status_code=status.HTTP_200_OK,
     response_model=list[GroupRequestOutputSchema],
 )
-async def get_user_group_requests(
+async def get_group_requests_for_user(
     access_token: AccessToken,
     group_service: GroupService,
     auth_service: AuthService,
