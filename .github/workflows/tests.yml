@@ -42,7 +42,7 @@ jobs:
       env:
         ENV_FILE: ${{ secrets.ENV_FILE }}
       run: |
-        echo $ENV_FILE | base64 --decode > .env
+        echo $ENV_FILE > .env
 
     - name: Set up database
       run: |
