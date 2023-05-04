@@ -38,14 +38,16 @@ jobs:
         python -m pip install poetry
         poetry install --no-dev
 
-    - name: Set up database
+    - name: Create env file
       env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+        ENV_FILE: ${{ secrets.ENV_FILE }}
+      run: |
+        echo $ENV_FILE | base64 --decode > .env
+
+    - name: Set up database
       run: |
         poetry run alembic upgrade head
 
     - name: Run tests
-      env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
       run: |
         poetry run pytest
