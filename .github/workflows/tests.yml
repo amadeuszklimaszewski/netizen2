@@ -39,10 +39,8 @@ jobs:
         poetry install --no-dev
 
     - name: Create env file
-      env:
-        ENV_FILE: ${{ secrets.ENV_FILE }}
       run: |
-        echo $ENV_FILE > .env
+        echo "${{ secrets.ENV_FILE }}" > .env
 
     - name: Set up database
       run: |
