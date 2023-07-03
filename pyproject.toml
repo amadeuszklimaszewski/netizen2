@@ -6,7 +6,7 @@ authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.95.1"
+fastapi = "^0.99.0"
 alembic = "^1.9.2"
 SQLAlchemy = {version = "^2.0.10", extras = ["asyncio"]}
 pydantic = "^1.10.4"
