@@ -12,7 +12,8 @@ services:
     ports:
     - 80:80
     depends_on:
-    - db
+      db:
+        condition: service_healthy
     networks:
     - backend_network
 
@@ -25,6 +26,10 @@ services:
     - postgres_data:/var/lib/postgresql/data
     networks:
     - backend_network
+    healthcheck:
+      test: "pg_isready --username=postgres && psql --username=postgres --list"
+      timeout: 10s
+      retries: 20
 
 networks:
   backend_network:

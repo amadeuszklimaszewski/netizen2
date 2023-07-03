@@ -18,7 +18,7 @@ ENV PYTHONFAULTHANDLER=1 \
     PIP_NO_CACHE_DIR=off \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-RUN apt-get update -q && apt-get install -yq netcat
+RUN apt-get update -q && apt-get install -yq netcat-traditional
 
 WORKDIR /app
 
