@@ -9,9 +9,9 @@ class UserOutputSchema(BaseOutputSchema):
     email: str
     is_active: bool
 
-    first_name: str | None
-    last_name: str | None
-    date_of_birth: date | None
+    first_name: str | None = None
+    last_name: str | None = None
+    date_of_birth: date | None = None
 
 
 class SendPasswordResetEmailSchema(BaseModel):

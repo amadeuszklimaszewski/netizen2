@@ -78,7 +78,7 @@ async def test_create_group(
     response: Response = await client.post(
         "/groups/",
         headers=user_bearer_token_header,
-        json=create_group_schema.dict(),
+        json=create_group_schema.model_dump(),
     )
 
     assert response.status_code == status.HTTP_201_CREATED
@@ -96,7 +96,7 @@ async def test_update_group(
     response: Response = await client.patch(
         f"/groups/{group.id}/",
         headers=user_bearer_token_header,
-        json=update_group_schema.dict(),
+        json=update_group_schema.model_dump(),
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -195,7 +195,7 @@ async def test_update_group_member(
     response: Response = await client.patch(
         f"/groups/{group.id}/members/{other_user_group_member.id}/",
         headers=user_bearer_token_header,
-        json=schema.dict(),
+        json=schema.model_dump(),
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -271,7 +271,7 @@ async def test_create_group_request(
     response: Response = await client.post(
         f"/groups/{group.id}/requests/",
         headers=other_user_bearer_token_header,
-        json=schema.dict(),
+        json=schema.model_dump(),
     )
 
     assert response.status_code == status.HTTP_201_CREATED
@@ -292,7 +292,7 @@ async def test_update_group_request(
     response: Response = await client.patch(
         f"/groups/{group.id}/requests/{other_user_group_request.id}/",
         headers=user_bearer_token_header,
-        json=schema.dict(),
+        json=schema.model_dump(),
     )
 
     assert response.status_code == status.HTTP_200_OK

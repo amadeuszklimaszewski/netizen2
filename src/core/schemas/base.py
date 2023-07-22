@@ -4,6 +4,6 @@ from pydantic import BaseModel
 
 
 class BaseUpdateSchema(BaseModel):
-    def dict(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+    def model_dump(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
         kwargs.setdefault("exclude_unset", True)
-        return super().dict(*args, **kwargs)
+        return super().model_dump(*args, **kwargs)

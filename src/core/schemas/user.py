@@ -1,7 +1,12 @@
 from datetime import date, datetime
-from typing import Any
 
-from pydantic import BaseModel, Field, validate_email, validator
+from pydantic import (
+    BaseModel,
+    Field,
+    FieldValidationInfo,
+    field_validator,
+    validate_email,
+)
 
 from src.core.schemas.base import BaseUpdateSchema
 from src.settings import settings
@@ -10,7 +15,8 @@ from src.settings import settings
 class DateOfBirthInputSchema(BaseModel):
     date_of_birth: date
 
-    @validator("date_of_birth")
+    @field_validator("date_of_birth")
+    @classmethod
     def validate_date_of_birth(cls, date_of_birth: date) -> date:
         if date_of_birth is None:
             return date_of_birth
@@ -34,14 +40,16 @@ class CreateUserSchema(DateOfBirthInputSchema):
     password: str = Field(min_length=8)
     repeat_password: str = Field(min_length=8)
 
-    @validator("email")
+    @field_validator("email")
+    @classmethod
     def validate_email(cls, email: str) -> str:
         validate_email(email)
         return email
 
-    @validator("repeat_password")
-    def validate_password(cls, repeat_password: str, values: dict[str, Any]) -> str:
-        if repeat_password != values["password"]:
+    @field_validator("repeat_password")
+    @classmethod
+    def validate_password(cls, repeat_password: str, info: FieldValidationInfo) -> str:
+        if repeat_password != info.data["password"]:
             raise ValueError("Passwords do not match")
         return repeat_password
 

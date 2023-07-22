@@ -6,7 +6,7 @@ from src.web.api.v1.schemas.base import BaseOutputSchema
 
 class GroupOutputSchema(BaseOutputSchema):
     name: str
-    description: str | None
+    description: str | None = None
     is_private: bool
 
 
@@ -22,5 +22,5 @@ class GroupRequestOutputSchema(BaseOutputSchema):
     user_id: UUID
     group_id: UUID
 
-    message: str | None
+    message: str | None = None
     status: GroupRequestStatus

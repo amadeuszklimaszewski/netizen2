@@ -23,7 +23,7 @@ class UserService:
             raise AlreadyExistsError("User with given email already exists")
 
         hashed_password = get_password_hash(schema.password)
-        user_data = schema.dict(exclude={"password", "repeat_password"})
+        user_data = schema.model_dump(exclude={"password", "repeat_password"})
         new_user = User(**user_data, password_hash=hashed_password)
         await self.repository.persist(new_user)
         return new_user
@@ -105,7 +105,7 @@ class UserService:
 
     async def update_user(self, user: User, schema: UpdateUserSchema) -> None:
         fields_to_update = []
-        for key, value in schema.dict().items():
+        for key, value in schema.model_dump().items():
             setattr(user, key, value)
             fields_to_update.append(key)
 

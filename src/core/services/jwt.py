@@ -16,7 +16,7 @@ def encode_jwt(payload: JWTPayload, algorithm: str = _JWT_ALGORITHM) -> str:
     :param algorithm: JWT algorithm
     :return: JWT token
     """
-    to_encode = payload.dict()
+    to_encode = payload.model_dump()
     to_encode["sub"] = str(to_encode["sub"])
 
     return jwt.encode(to_encode, _SECRET_KEY, algorithm=algorithm)

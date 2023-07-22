@@ -33,4 +33,4 @@ db-shell:
 	docker compose exec db psql -U $(postgres-user)
 
 test:
-	docker compose exec web bash -c "pytest -s $(location)"
+	docker compose exec web bash -c "python3 -m pytest -s $(location)"

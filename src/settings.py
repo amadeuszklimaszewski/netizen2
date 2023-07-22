@@ -1,10 +1,10 @@
 from pathlib import Path
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class AppSettings(BaseSettings):
-    ENVIRONMENT = "development"
+    ENVIRONMENT: str = "development"
 
     HOST: str = "127.0.0.1"
     PORT: int = 8000
@@ -54,9 +54,10 @@ class DatabaseSettings(BaseSettings):
 
 
 class Settings(AppSettings, JWTSettings, EmailSettings, DatabaseSettings):
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+    )
 
 
 settings = Settings()  # type: ignore

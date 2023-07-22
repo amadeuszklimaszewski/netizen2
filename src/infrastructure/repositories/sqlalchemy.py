@@ -41,7 +41,7 @@ class SQLAlchemyRepository(Generic[PK, Model], BaseRepository[PK, Model], ABC):
         return [self._model.from_orm(result) for result in results]
 
     async def persist(self, model: Model) -> None:
-        stmt = insert(self._table).values(**model.dict())
+        stmt = insert(self._table).values(**model.model_dump())
         try:
             await self._conn.execute(stmt)
         except IntegrityError:
@@ -50,7 +50,7 @@ class SQLAlchemyRepository(Generic[PK, Model], BaseRepository[PK, Model], ABC):
             )
 
     async def persist_many(self, models: list[Model]) -> None:
-        stmt = insert(self._table).values([model.dict() for model in models])
+        stmt = insert(self._table).values([model.model_dump() for model in models])
         try:
             await self._conn.execute(stmt)
         except IntegrityError:
@@ -83,7 +83,7 @@ class SQLAlchemyRepository(Generic[PK, Model], BaseRepository[PK, Model], ABC):
                 if field not in {"created_at", "updated_at"}
             }
         else:
-            update_data = model.dict(exclude={"id", "created_at", "updated_at"})
+            update_data = model.model_dump(exclude={"id", "created_at", "updated_at"})
 
         stmt = (
             update(self._table)

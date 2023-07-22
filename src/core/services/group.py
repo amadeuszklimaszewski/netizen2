@@ -49,7 +49,7 @@ class GroupService:
         self.request_repository = request_repository
 
     async def create_group(self, user_id: UUID, schema: CreateGroupSchema) -> Group:
-        group = Group(**schema.dict())
+        group = Group(**schema.model_dump())
         member = GroupMember(
             user_id=user_id,
             group_id=group.id,
@@ -80,7 +80,7 @@ class GroupService:
             raise NotAGroupOwnerError("Not the owner of the group")
 
         fields_to_update = []
-        for key, value in schema.dict().items():
+        for key, value in schema.model_dump().items():
             setattr(group, key, value)
             fields_to_update.append(key)
 
@@ -114,7 +114,7 @@ class GroupService:
         if input_filters is None:
             input_filters = GroupInputFilters()
 
-        filter_set = GroupFilterSet(**input_filters.dict())
+        filter_set = GroupFilterSet(**input_filters.model_dump())
         return await self.group_repository.get_many(filter_set)
 
     async def get_groups_for_user(
@@ -154,7 +154,7 @@ class GroupService:
         group_request = GroupRequest(
             user_id=user_id,
             group_id=group_id,
-            **schema.dict(),
+            **schema.model_dump(),
         )
         await self.request_repository.persist(group_request)
         return group_request
@@ -289,7 +289,7 @@ class GroupService:
         except DoesNotExistError:
             pass
 
-        group_member = GroupMember(**schema.dict())
+        group_member = GroupMember(**schema.model_dump())
         await self.member_repository.persist(group_member)
         return group_member
 
@@ -432,7 +432,7 @@ class GroupService:
         filter_set = GroupMemberFilterSet(
             group_id__eq=group_id,
             user_id__eq=None,
-            **filters.dict(),
+            **filters.model_dump(),
         )
 
         group = await self.group_repository.get(pk=group_id)

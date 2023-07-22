@@ -3,10 +3,10 @@ WIP second version of Netizen, a FastAPI app that aims to recreate the backend f
 Inspired by hexagonal and clean architecture, altered to fit my preferences.
 
 ## Tech stack
-* FastAPI `0.95.1`
-* SQLAlchemy `2.0.10`
+* FastAPI `0.100.0`
+* SQLAlchemy `2.0.19`
 * Alembic `1.9.2`
-* PostgreSQL `15.1`
+* PostgreSQL `15.3`
 * Docker
 
 ## Functionality

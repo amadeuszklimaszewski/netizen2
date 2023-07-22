@@ -7,21 +7,21 @@ from src.core.filters.base import FilterSet
 
 
 class GroupFilterSet(FilterSet):
-    name__eq: str | None
-    is_private__eq: bool | None
+    name__eq: str | None = None
+    is_private__eq: bool | None = None
 
 
 class GroupMemberFilterSet(FilterSet):
-    group_id__eq: UUID | None
-    user_id__eq: UUID | None
-    is_admin__eq: bool | None
-    is_owner__eq: bool | None
+    group_id__eq: UUID | None = None
+    user_id__eq: UUID | None = None
+    is_admin__eq: bool | None = None
+    is_owner__eq: bool | None = None
 
 
 class GroupRequestFilterSet(FilterSet):
-    group_id__eq: UUID | None
-    user_id__eq: UUID | None
-    status__eq: GroupRequestStatus | None
+    group_id__eq: UUID | None = None
+    user_id__eq: UUID | None = None
+    status__eq: GroupRequestStatus | None = None
 
 
 class GroupInputFilters(BaseModel):

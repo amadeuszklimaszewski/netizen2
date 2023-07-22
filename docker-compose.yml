@@ -29,7 +29,7 @@ services:
     - 8025:8025
 
   db:
-    image: postgres:15.1
+    image: postgres:15.3
     container_name: db
     env_file: ./.env
     volumes:

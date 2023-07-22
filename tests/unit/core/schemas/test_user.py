@@ -62,15 +62,15 @@ def test_date_of_birth_schema_too_young() -> None:
 
 def test_update_user_schema_dict_excludes_unset() -> None:
     schema = UpdateUserSchema()
-    assert schema.dict() == {}
+    assert schema.model_dump() == {}
 
 
 def test_update_user_schema_dict_includes_set() -> None:
     birthday = date(year=2000, month=1, day=1)
     schema = UpdateUserSchema(first_name="John", date_of_birth=birthday)
-    assert schema.dict() == {"first_name": "John", "date_of_birth": birthday}
+    assert schema.model_dump() == {"first_name": "John", "date_of_birth": birthday}
 
 
 def test_update_user_schema_with_implicit_none_date_of_birth() -> None:
     schema = UpdateUserSchema(date_of_birth=None)
-    assert schema.dict() == {"date_of_birth": None}
+    assert schema.model_dump() == {"date_of_birth": None}

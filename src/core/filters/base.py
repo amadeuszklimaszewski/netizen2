@@ -3,6 +3,7 @@ from typing import Callable
 from uuid import UUID
 
 from pydantic import BaseModel
+from pydantic.fields import ModelPrivateAttr
 from sqlalchemy import Table
 
 
@@ -30,18 +31,23 @@ class SQLAlchemyFilter(Filter):
 
 
 class FilterSet(BaseModel):
-    _operators_mapping = {
-        "eq": operator.eq,
-        "ne": operator.ne,
-        "lt": operator.lt,
-        "le": operator.le,
-        "gt": operator.gt,
-        "ge": operator.ge,
-    }
+    _operators_mapping = ModelPrivateAttr(
+        default={
+            "eq": operator.eq,
+            "ne": operator.ne,
+            "lt": operator.lt,
+            "le": operator.le,
+            "gt": operator.gt,
+            "ge": operator.ge,
+        },
+    )
 
     def get_filters(self) -> list[Filter]:
         filters = []
-        for key, value in self.dict(exclude_none=True, exclude_unset=True).items():
+        for key, value in self.model_dump(
+            exclude_none=True,
+            exclude_unset=True,
+        ).items():
             field, operator_ = key.split("__")
             try:
                 operator_func = self._get_operator(operator_)
@@ -60,4 +66,4 @@ class FilterSet(BaseModel):
 
     @classmethod
     def _get_operator(cls, operator_name: str) -> Callable:
-        return cls._operators_mapping[operator_name]
+        return cls._operators_mapping.default[operator_name]
