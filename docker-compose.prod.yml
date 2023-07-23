@@ -18,7 +18,7 @@ services:
     - backend_network
 
   db:
-    image: postgres:15.3
+    image: postgres:15.3-bullseye
     container_name: db
     restart: always
     env_file: ./.env
