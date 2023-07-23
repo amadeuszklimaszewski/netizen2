@@ -34,7 +34,7 @@ class GroupRepository(
             .where(self._group_member_table.c.user_id == user_id)
         )
         results = await self._conn.execute(stmt)
-        return [self._model.from_orm(result) for result in results]
+        return [self._model.model_validate(result) for result in results]
 
     @property
     def _group_member_table(self) -> Table:
@@ -73,7 +73,7 @@ class GroupMemberRepository(
                 f"with given group_id - {group_id} and user_id - {user_id}",
             )
 
-        return self._model.from_orm(result)
+        return self._model.model_validate(result)
 
     async def delete_by_group_id(self, group_id: uuid.UUID) -> None:
         stmt = delete(self._table).where(self._table.c.group_id == group_id)
@@ -113,7 +113,7 @@ class GroupRequestRepository(
                 f"with given group_id - {group_id} and user_id - {user_id}",
             )
 
-        return self._model.from_orm(result)
+        return self._model.model_validate(result)
 
     async def delete_by_group_id(self, group_id: uuid.UUID) -> None:
         stmt = delete(self._table).where(self._table.c.group_id == group_id)

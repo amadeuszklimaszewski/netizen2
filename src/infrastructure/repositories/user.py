@@ -21,7 +21,7 @@ class UserRepository(
         if not result:
             return None
 
-        return self._model.from_orm(result)
+        return self._model.model_validate(result)
 
     @property
     def _table(self) -> Table:

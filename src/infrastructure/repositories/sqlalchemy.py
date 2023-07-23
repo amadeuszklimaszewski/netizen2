@@ -25,7 +25,7 @@ class SQLAlchemyRepository(Generic[PK, Model], BaseRepository[PK, Model], ABC):
             raise DoesNotExistError(
                 f"{self.__class__.__name__} could not find {self._model.__name__} with given PK - {pk}",
             )
-        return self._model.from_orm(result)
+        return self._model.model_validate(result)
 
     async def get_many(self, filter_set: FilterSet | None = None) -> list[Model]:
         exps = []
@@ -38,7 +38,7 @@ class SQLAlchemyRepository(Generic[PK, Model], BaseRepository[PK, Model], ABC):
 
         stmt = select(self._table).where(*exps)
         results: CursorResult = await self._conn.execute(stmt)
-        return [self._model.from_orm(result) for result in results]
+        return [self._model.model_validate(result) for result in results]
 
     async def persist(self, model: Model) -> None:
         stmt = insert(self._table).values(**model.model_dump())
