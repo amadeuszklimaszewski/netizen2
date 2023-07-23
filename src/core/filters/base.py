@@ -1,5 +1,5 @@
 import operator
-from typing import Callable
+from typing import Callable, Self
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -22,7 +22,7 @@ class SQLAlchemyFilter(Filter):
         return self.operator(column, self.value)
 
     @classmethod
-    def from_filter(cls, filter_: Filter) -> "SQLAlchemyFilter":
+    def from_filter(cls, filter_: Filter) -> Self:
         return cls(
             field=filter_.field,
             operator=filter_.operator,
