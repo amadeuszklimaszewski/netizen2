@@ -40,6 +40,23 @@ services:
     networks:
     - backend_network
 
+  celery:
+    build:
+      context: .
+      dockerfile: ./docker/python/Dockerfile
+    container_name: celery
+    restart: always
+    command: celery -A src.infrastructure.celery worker --loglevel=info
+    env_file: ./.env
+    depends_on:
+    - redis
+    - db
+    volumes:
+    - .:/app
+    working_dir: /app
+    networks:
+    - backend_network
+
   flower:
     image: mher/flower:latest
     container_name: flower

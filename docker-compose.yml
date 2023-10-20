@@ -47,7 +47,7 @@ services:
       dockerfile: ./docker/python/Dockerfile
     container_name: celery
     restart: always
-    command: celery -A src.infrastructure.celery worker --loglevel=debug
+    command: celery -A src.infrastructure.celery worker --loglevel=info
     env_file: ./.env
     depends_on:
     - redis
