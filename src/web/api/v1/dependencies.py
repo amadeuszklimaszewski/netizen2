@@ -2,8 +2,7 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from src.core.interfaces.email import EmailClient as IEmailClient
-from src.core.interfaces.email import EmailService as IEmailService
+from src.core.interfaces.email import EmailSender as IEmailSender
 from src.core.interfaces.repositories.group import (
     GroupMemberRepository as IGroupMemberRepository,
 )
@@ -16,14 +15,13 @@ from src.core.services.auth import AuthService
 from src.core.services.group import GroupService
 from src.core.services.user import UserService
 from src.infrastructure.database.connection import get_db
-from src.infrastructure.email import EmailService, SMTPClient
+from src.infrastructure.email import CeleryEmailSender
 from src.infrastructure.repositories.group import (
     GroupMemberRepository,
     GroupRepository,
     GroupRequestRepository,
 )
 from src.infrastructure.repositories.user import UserRepository
-from src.settings import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="v1/auth/login/")
 
@@ -52,24 +50,15 @@ def get_group_request_repository(
     return GroupRequestRepository(conn)
 
 
-def get_email_client() -> IEmailClient:
-    if settings.ENVIRONMENT == "development":
-        return SMTPClient()
-
-    raise NotImplementedError
-
-
-def get_email_service(
-    client: IEmailClient = Depends(get_email_client),
-) -> IEmailService:
-    return EmailService(client)
+def get_email_sender() -> IEmailSender:
+    return CeleryEmailSender()
 
 
 def get_user_service(
     user_repository: IUserRepository = Depends(get_user_repository),
-    email_service: IEmailService = Depends(get_email_service),
+    email_sender: IEmailSender = Depends(get_email_sender),
 ) -> UserService:
-    return UserService(user_repository, email_service)
+    return UserService(user_repository, email_sender)
 
 
 def get_auth_service(

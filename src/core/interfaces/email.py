@@ -16,3 +16,9 @@ class EmailService(ABC):
     @abstractmethod
     def send_email(self, email: EmailSchema) -> None:
         raise NotImplementedError
+
+
+class EmailSender(ABC):
+    @abstractmethod
+    def send(self, email: EmailSchema) -> None:
+        raise NotImplementedError

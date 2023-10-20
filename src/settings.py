@@ -18,6 +18,16 @@ class AppSettings(BaseSettings):
     MINIMUM_AGE: int = 18
 
 
+class CelerySettings(BaseSettings):
+    CELERY_BROKER_URL: str = "redis://redis:6379/0"
+    CELERY_RESULT_BACKEND: str = "redis://redis:6379/0"
+    CELERY_ACCEPT_CONTENT: list[str] = [
+        "application/json",
+        "application/x-python-serialize",
+        "pickle",
+    ]
+
+
 class EmailSettings(BaseSettings):
     MAIL_FROM: str = "default@example.com"
     MAIL_FROM_NAME: str = "netizen team"
@@ -53,7 +63,13 @@ class DatabaseSettings(BaseSettings):
         )
 
 
-class Settings(AppSettings, JWTSettings, EmailSettings, DatabaseSettings):
+class Settings(
+    AppSettings,
+    CelerySettings,
+    JWTSettings,
+    EmailSettings,
+    DatabaseSettings,
+):
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

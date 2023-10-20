@@ -1,33 +1,6 @@
 version: "3.8"
 
 services:
-  web:
-    build:
-      context: .
-      dockerfile: ./docker/python/Dockerfile
-    container_name: backend
-    restart: always
-    env_file: ./.env
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload --workers 2
-    environment:
-    - MAIL_SERVER=mailhog
-    - MAIL_PORT=1025
-    - MAIL_USERNAME=dev
-    - MAIL_PASSWORD=dev
-    ports:
-    - 8000:8000
-    depends_on:
-    - db
-    volumes:
-    - .:/app
-
-  mailhog:
-    image: mailhog/mailhog:latest
-    restart: always
-    ports:
-    - 1025:1025
-    - 8025:8025
-
   db:
     image: postgres:15.3-bullseye
     container_name: db
@@ -37,5 +10,73 @@ services:
     - ./docker/postgres:/docker-entrypoint-initdb.d
     restart: always
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+    - 6379:6379
+    volumes:
+    - redis_data:/data
+
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/python/Dockerfile
+    container_name: backend
+    restart: always
+    env_file: ./.env
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload --workers 2
+    ports:
+    - 8000:8000
+    depends_on:
+    - redis
+    - db
+    volumes:
+    - .:/app
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: always
+    ports:
+    - 8025:8025
+
+  celery:
+    build:
+      context: .
+      dockerfile: ./docker/python/Dockerfile
+    container_name: celery
+    restart: always
+    command: celery -A src.infrastructure.celery worker --loglevel=debug
+    env_file: ./.env
+    depends_on:
+    - redis
+    - db
+    volumes:
+    - .:/app
+    working_dir: /app
+
+  flower:
+    image: mher/flower:latest
+    container_name: flower
+    restart: always
+    command: celery flower --port=5555 --persistent=true --db=/flower/flower.db --basic_auth=admin:admin
+    user: root
+    environment:
+    - CELERY_BROKER_URL=redis://redis:6379/0
+    - CELERY_TASK_SERIALIZER='pickle'
+    - CELERY_ACCEPT_CONTENT=['application/x-python-serialize', 'application/json']
+    depends_on:
+    - celery
+    ports:
+    - 5555:5555
+    volumes:
+    - flower_data:/flower
+
+networks:
+  backend_network:
+
 volumes:
   postgres_data:
+  redis_data:
+  flower_data:

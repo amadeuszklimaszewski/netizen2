@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, create_async_engine
 from tests.fakes.database import FakeDatabase
-from tests.fakes.email import FakeEmailService
+from tests.fakes.email import FakeEmailSender
 from tests.fakes.repositories.group import (
     FakeGroupMemberRepository,
     FakeGroupRepository,
@@ -14,7 +14,7 @@ from tests.fakes.repositories.group import (
 )
 from tests.fakes.repositories.user import FakeUserRepository
 
-from src.core.interfaces.email import EmailService
+from src.core.interfaces.email import EmailSender
 from src.core.interfaces.repositories.group import (
     GroupMemberRepository,
     GroupRepository,
@@ -28,7 +28,7 @@ from src.infrastructure.database.metadata import metadata
 from src.infrastructure.database.tables import load_all_tables
 from src.settings import Settings
 from src.web.api.v1.dependencies import (
-    get_email_service,
+    get_email_sender,
     get_group_member_repository,
     get_group_repository,
     get_group_request_repository,
@@ -83,9 +83,9 @@ def user_repository(fake_db: FakeDatabase) -> UserRepository:
 @pytest.fixture
 def user_service(
     user_repository: UserRepository,
-    email_service: EmailService,
+    email_sender: EmailSender,
 ) -> UserService:
-    return UserService(user_repository, email_service)
+    return UserService(user_repository, email_sender)
 
 
 @pytest.fixture
@@ -124,13 +124,13 @@ def group_service(
 
 
 @pytest.fixture
-def email_service() -> EmailService:
-    return FakeEmailService()
+def email_sender() -> EmailSender:
+    return FakeEmailSender()
 
 
 @pytest.fixture
 def fastapi_app(
-    email_service: EmailService,
+    email_sender: EmailSender,
     user_repository: UserRepository,
     group_repository: GroupRepository,
     group_member_repository: GroupMemberRepository,
@@ -138,7 +138,7 @@ def fastapi_app(
 ) -> FastAPI:
     app = get_app()
     app.dependency_overrides[get_user_repository] = lambda: user_repository
-    app.dependency_overrides[get_email_service] = lambda: email_service
+    app.dependency_overrides[get_email_sender] = lambda: email_sender
     app.dependency_overrides[get_group_repository] = lambda: group_repository
     app.dependency_overrides[
         get_group_member_repository

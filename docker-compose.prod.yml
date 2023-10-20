@@ -31,9 +31,33 @@ services:
       timeout: 10s
       retries: 20
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    volumes:
+    - redis_data:/data
+    networks:
+    - backend_network
+
+  flower:
+    image: mher/flower:latest
+    container_name: flower
+    restart: always
+    command: celery flower --port=5555 --persistent=true --db=/flower/flower.db --basic_auth=admin:admin
+    user: root
+    environment:
+    - CELERY_BROKER_URL=redis://redis:6379/0
+    - CELERY_TASK_SERIALIZER='pickle'
+    - CELERY_ACCEPT_CONTENT=['application/x-python-serialize', 'application/json']
+    depends_on:
+    - celery
+    networks:
+    - backend_network
+
 networks:
   backend_network:
 
-
 volumes:
   postgres_data:
+  redis_data:

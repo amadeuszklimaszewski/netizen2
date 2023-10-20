@@ -7,7 +7,7 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from src.core.exceptions import AlreadyExistsError, DoesNotExistError
-from src.core.interfaces.email import EmailService
+from src.core.interfaces.email import EmailSender
 from src.core.models.user import User
 from src.core.schemas.user import CreateUserSchema
 from src.core.services.user import UserService
@@ -22,9 +22,9 @@ def user_repository(async_db_connection: AsyncConnection) -> UserRepository:
 @pytest.fixture
 def user_service(
     user_repository: UserRepository,
-    email_service: EmailService,
+    email_sender: EmailSender,
 ) -> UserService:
-    return UserService(user_repository, email_service)
+    return UserService(user_repository, email_sender)
 
 
 @pytest.fixture

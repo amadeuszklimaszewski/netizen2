@@ -5,7 +5,7 @@ from src.core.exceptions import (
     AlreadyExistsError,
     DoesNotExistError,
 )
-from src.core.interfaces.email import EmailService
+from src.core.interfaces.email import EmailSender
 from src.core.interfaces.repositories.user import UserRepository
 from src.core.models.user import User
 from src.core.schemas.email import EmailSchema
@@ -14,9 +14,9 @@ from src.core.utils import get_password_hash
 
 
 class UserService:
-    def __init__(self, repository: UserRepository, email_service: EmailService):
+    def __init__(self, repository: UserRepository, email_sender: EmailSender):
         self.repository = repository
-        self.email_service = email_service
+        self.email_sender = email_sender
 
     async def create_user(self, schema: CreateUserSchema) -> User:
         if await self.repository.get_by_email(schema.email):
@@ -44,7 +44,7 @@ class UserService:
             template_name="email_confirmation.html",
             context=user.get_email_context(),
         )
-        self.email_service.send_email(activation_email)
+        self.email_sender.send(activation_email)
 
     async def send_password_reset_email(self, email: str) -> None:
         user = await self.repository.get_by_email(email)
@@ -61,7 +61,7 @@ class UserService:
             template_name="password_reset.html",
             context=user.get_email_context(),
         )
-        self.email_service.send_email(password_reset_email)
+        self.email_sender.send(password_reset_email)
 
     async def activate_user(self, user_id: UUID) -> None:
         user = await self.repository.get(pk=user_id)

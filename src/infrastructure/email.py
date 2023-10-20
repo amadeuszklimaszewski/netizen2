@@ -6,8 +6,10 @@ from typing import Any
 from jinja2 import Template
 
 from src.core.interfaces.email import EmailClient as IEmailClient
+from src.core.interfaces.email import EmailSender as IEmailSender
 from src.core.interfaces.email import EmailService as IEmailService
 from src.core.schemas.email import EmailSchema
+from src.infrastructure.celery import app
 from src.settings import settings
 
 
@@ -23,16 +25,16 @@ class SMTPClient(IEmailClient):
         self.username = settings.MAIL_USERNAME
         self.password = settings.MAIL_PASSWORD
 
-    def send(self, schema: EmailSchema, body: str) -> None:
+    def prepare_email_message(self, schema: EmailSchema, body: str) -> EmailMessage:
         msg = EmailMessage()
         msg["From"] = schema.from_email
         msg["To"] = ", ".join(schema.recipients)
         msg["Subject"] = schema.subject
         msg.add_alternative(body, subtype="html")
+        return msg
 
-        self._send_message(msg)
-
-    def _send_message(self, message: EmailMessage) -> None:
+    def send(self, schema: EmailSchema, body: str) -> None:
+        message = self.prepare_email_message(schema, body)
         with smtplib.SMTP(self.server, self.port) as smtp_server:
             smtp_server.login(self.username, self.password)
             smtp_server.send_message(message)
@@ -45,7 +47,6 @@ class EmailService(IEmailService):
     def send_email(self, schema: EmailSchema) -> None:
         template: Template = self._get_html_template(schema.template_name)
         body = self._render_template(template, schema.context)
-
         self.client.send(schema, body)
 
     @classmethod
@@ -57,3 +58,20 @@ class EmailService(IEmailService):
     @classmethod
     def _render_template(cls, template: Template, context: dict[str, Any]) -> str:
         return template.render(**context)
+
+
+class CeleryEmailSender(IEmailSender):
+    def send(self, schema: EmailSchema) -> None:
+        send_email.apply_async(args=(schema,))
+
+
+@app.task(
+    serializer="pickle",
+    ignore_result=True,
+    autoretry_for=(Exception,),
+    acks_late=True,
+)
+def send_email(schema: EmailSchema) -> None:
+    client = SMTPClient()
+    service = EmailService(client)
+    service.send_email(schema)

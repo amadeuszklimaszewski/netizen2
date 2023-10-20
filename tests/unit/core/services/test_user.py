@@ -125,7 +125,7 @@ async def test_send_activation_email(
     user: User,
     mocker: MockerFixture,
 ) -> None:
-    user_service.email_service.send_email = mocker.Mock()  # type: ignore
+    user_service.email_sender.send = mocker.Mock()  # type: ignore
 
     await user_service.send_activation_email(user.id)
 
@@ -137,7 +137,7 @@ async def test_send_activation_email(
         template_name="email_confirmation.html",
         context=user.get_email_context(),
     )
-    assert user_service.email_service.send_email.mock_calls == [  # type: ignore
+    assert user_service.email_sender.send.mock_calls == [  # type: ignore
         mocker.call(expected_email),
     ]
 
@@ -200,7 +200,7 @@ async def test_send_password_reset_email(
     user: User,
     mocker: MockerFixture,
 ) -> None:
-    user_service.email_service.send_email = mocker.Mock()  # type: ignore
+    user_service.email_sender.send = mocker.Mock()  # type: ignore
     await user_service.send_password_reset_email(user.email)
 
     assert user.password_reset_token is not None
@@ -211,7 +211,7 @@ async def test_send_password_reset_email(
         template_name="password_reset.html",
         context=user.get_email_context(),
     )
-    assert user_service.email_service.send_email.mock_calls == [  # type: ignore
+    assert user_service.email_sender.send.mock_calls == [  # type: ignore
         mocker.call(expected_email),
     ]
 
