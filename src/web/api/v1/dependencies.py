@@ -11,6 +11,7 @@ from src.core.interfaces.repositories.group import (
     GroupRequestRepository as IGroupRequestRepository,
 )
 from src.core.interfaces.repositories.user import UserRepository as IUserRepository
+from src.core.models.user import User
 from src.core.services.auth import AuthService
 from src.core.services.group import GroupService
 from src.core.services.user import UserService
@@ -81,3 +82,10 @@ def get_group_service(
         group_member_repository,
         group_request_repository,
     )
+
+
+async def get_user(
+    access_token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> User:
+    return await auth_service.verify_access_token(access_token)

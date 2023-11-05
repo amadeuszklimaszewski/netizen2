@@ -12,7 +12,7 @@ from src.core.schemas.group import (
     UpdateGroupRequestSchema,
     UpdateGroupSchema,
 )
-from src.web.api.v1.annotations import AccessToken, AuthService, GroupService
+from src.web.api.v1.annotations import GroupService, User
 from src.web.api.v1.schemas.base import IDOnlyOutputSchema
 from src.web.api.v1.schemas.group import (
     GroupMemberOutputSchema,
@@ -30,13 +30,10 @@ group_router = APIRouter(prefix="/groups")
     response_model=list[GroupOutputSchema],
 )
 async def get_groups(
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
     filters: Annotated[GroupInputFilters, Depends()],
 ):
-    await auth_service.verify_access_token(access_token)
-
     return await group_service.get_groups(filters)
 
 
@@ -48,13 +45,10 @@ async def get_groups(
 )
 async def create_group(
     schema: CreateGroupSchema,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    return await group_service.create_group(user.id, schema)
+    return await group_service.create_group(request_user.id, schema)
 
 
 @group_router.get(
@@ -64,13 +58,10 @@ async def create_group(
     response_model=list[GroupOutputSchema],
 )
 async def get_groups_for_user(
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    return await group_service.get_groups_for_user(user.id)
+    return await group_service.get_groups_for_user(request_user.id)
 
 
 @group_router.get(
@@ -80,13 +71,10 @@ async def get_groups_for_user(
     response_model=list[GroupRequestOutputSchema],
 )
 async def get_group_requests_for_user(
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    return await group_service.get_group_requests_for_user(user.id)
+    return await group_service.get_group_requests_for_user(request_user.id)
 
 
 @group_router.get(
@@ -97,12 +85,9 @@ async def get_group_requests_for_user(
 )
 async def get_group(
     group_id: UUID,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    await auth_service.verify_access_token(access_token)
-
     return await group_service.get_group(group_id)
 
 
@@ -115,13 +100,10 @@ async def get_group(
 async def update_group(
     group_id: UUID,
     schema: UpdateGroupSchema,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    await group_service.update_group(user.id, group_id, schema)
+    await group_service.update_group(request_user.id, group_id, schema)
     return IDOnlyOutputSchema(id=group_id)
 
 
@@ -132,13 +114,10 @@ async def update_group(
 )
 async def delete_group(
     group_id: UUID,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    await group_service.delete_group(user.id, group_id)
+    await group_service.delete_group(request_user.id, group_id)
 
 
 @group_router.get(
@@ -149,14 +128,11 @@ async def delete_group(
 )
 async def get_group_members(
     group_id: UUID,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
     filters: Annotated[GroupMemberInputFilters, Depends()],
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    return await group_service.get_group_members(user.id, group_id, filters)
+    return await group_service.get_group_members(request_user.id, group_id, filters)
 
 
 @group_router.get(
@@ -168,13 +144,10 @@ async def get_group_members(
 async def get_group_member(
     group_id: UUID,
     member_id: UUID,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    return await group_service.get_group_member(user.id, group_id, member_id)
+    return await group_service.get_group_member(request_user.id, group_id, member_id)
 
 
 @group_router.patch(
@@ -187,13 +160,15 @@ async def update_group_member(
     group_id: UUID,
     member_id: UUID,
     schema: UpdateGroupMemberSchema,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    await group_service.update_group_member(user.id, group_id, member_id, schema)
+    await group_service.update_group_member(
+        request_user.id,
+        group_id,
+        member_id,
+        schema,
+    )
     return IDOnlyOutputSchema(id=member_id)
 
 
@@ -205,13 +180,10 @@ async def update_group_member(
 async def delete_group_member(
     group_id: UUID,
     member_id: UUID,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    await group_service.delete_group_member(user.id, group_id, member_id)
+    await group_service.delete_group_member(request_user.id, group_id, member_id)
 
 
 @group_router.get(
@@ -222,13 +194,10 @@ async def delete_group_member(
 )
 async def get_group_requests_for_group(
     group_id: UUID,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    return await group_service.get_group_requests_for_group(user.id, group_id)
+    return await group_service.get_group_requests_for_group(request_user.id, group_id)
 
 
 @group_router.post(
@@ -240,13 +209,10 @@ async def get_group_requests_for_group(
 async def create_group_request(
     group_id: UUID,
     schema: CreateGroupRequestSchema,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    return await group_service.create_group_request(user.id, group_id, schema)
+    return await group_service.create_group_request(request_user.id, group_id, schema)
 
 
 @group_router.get(
@@ -258,13 +224,10 @@ async def create_group_request(
 async def get_group_request(
     group_id: UUID,
     request_id: UUID,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    return await group_service.get_group_request(user.id, group_id, request_id)
+    return await group_service.get_group_request(request_user.id, group_id, request_id)
 
 
 @group_router.patch(
@@ -277,13 +240,15 @@ async def update_group_request(
     group_id: UUID,
     request_id: UUID,
     schema: UpdateGroupRequestSchema,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    await group_service.update_group_request(user.id, group_id, request_id, schema)
+    await group_service.update_group_request(
+        request_user.id,
+        group_id,
+        request_id,
+        schema,
+    )
     return IDOnlyOutputSchema(id=request_id)
 
 
@@ -295,10 +260,7 @@ async def update_group_request(
 async def delete_group_request(
     group_id: UUID,
     request_id: UUID,
-    access_token: AccessToken,
+    request_user: User,
     group_service: GroupService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    await group_service.delete_group_request(user.id, group_id, request_id)
+    await group_service.delete_group_request(request_user.id, group_id, request_id)

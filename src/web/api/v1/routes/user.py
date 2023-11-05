@@ -10,7 +10,7 @@ from src.core.exceptions import (
     PermissionDeniedError,
 )
 from src.core.schemas.user import CreateUserSchema, UpdateUserSchema
-from src.web.api.v1.annotations import AccessToken, AuthService, UserService
+from src.web.api.v1.annotations import AccessToken, AuthService, User, UserService
 from src.web.api.v1.schemas.base import IDOnlyOutputSchema
 from src.web.api.v1.schemas.user import (
     PasswordResetSchema,
@@ -28,12 +28,9 @@ user_router = APIRouter(prefix="/users")
     response_model=list[UserOutputSchema],
 )
 async def get_users(
-    access_token: AccessToken,
+    request_user: User,
     user_service: UserService,
-    auth_service: AuthService,
 ):
-    await auth_service.verify_access_token(access_token)
-
     return await user_service.get_users()
 
 
@@ -64,11 +61,8 @@ async def create_user(
     status_code=status.HTTP_200_OK,
     response_model=UserOutputSchema,
 )
-async def get_current_user(
-    access_token: AccessToken,
-    auth_service: AuthService,
-):
-    return await auth_service.verify_access_token(access_token)
+async def get_current_user(request_user: User):
+    return request_user
 
 
 @user_router.post(
@@ -91,12 +85,9 @@ async def unauthenticated_send_password_reset_email(
 )
 async def get_user(
     user_id: UUID,
-    access_token: AccessToken,
+    request_user: User,
     user_service: UserService,
-    auth_service: AuthService,
 ):
-    await auth_service.verify_access_token(access_token)
-
     return await user_service.get_user(user_id)
 
 
@@ -129,16 +120,13 @@ async def update_user(
 )
 async def delete_user(
     user_id: UUID,
-    access_token: AccessToken,
+    request_user: User,
     user_service: UserService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    if user.id != user_id and not user.is_superuser:
+    if request_user.id != user_id and not request_user.is_superuser:
         raise PermissionDeniedError()
 
-    await user_service.delete_user(user)
+    await user_service.delete_user(request_user)
 
 
 @user_router.post(
@@ -148,16 +136,13 @@ async def delete_user(
 )
 async def send_password_reset_email(
     user_id: UUID,
-    access_token: AccessToken,
+    request_user: User,
     user_service: UserService,
-    auth_service: AuthService,
 ):
-    user = await auth_service.verify_access_token(access_token)
-
-    if user.id != user_id and not user.is_superuser:
+    if request_user.id != user_id and not request_user.is_superuser:
         raise PermissionDeniedError()
 
-    await user_service.send_password_reset_email(user.email)
+    await user_service.send_password_reset_email(request_user.email)
 
 
 @user_router.post(
